@@ -29,7 +29,7 @@ gcloud compute instances create jk-ssd \
 docker run -it --rm --gpus all \
 -v /mnt/disks/ssd/training_data:/training_data \
 -v /mnt/disks/ssd/validation_data:/validation_data \
--v /mnt/disks/ssd/output:output \
+-v /mnt/disks/ssd/output:/output \
 gcr.io/jk-mlops-dev/merlin-preprocess \
 python preprocess.py \
 --training_data /training_data \
