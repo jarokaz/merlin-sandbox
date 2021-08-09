@@ -23,3 +23,12 @@ gcloud compute instances create jk-ssd \
    
   gcloud notebooks instances register jk-ssd --location us-central1-a
 ```
+
+
+```
+docker run -it --rm --gpus all gcr.io/jk-mlops-dev/merlin-preprocess \
+-v /mnt/disks/ssd/training_data:/training_data \
+-v /mnt/disks/ssd/validation_data:/validation_data \
+--training_data /training_data \
+--validation_data /validation_data
+```
