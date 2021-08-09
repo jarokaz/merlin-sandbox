@@ -19,4 +19,6 @@ gcloud compute instances create jk-ssd \
    --local-ssd interface=nvme \
    --local-ssd interface=nvme \
    --local-ssd interface=nvme 
+   
+  gcloud notebooks instances register jk-ssd --location us-central1-a
 ```
