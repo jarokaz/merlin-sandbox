@@ -9,6 +9,8 @@ gcloud compute instances create jk-ssd \
    --project jk-mlops-dev \
    --zone us-central1-a \
    --machine-type n1-standard-32 \
+   --accelerator type=nvidia-tesla-t4 \
+   --count=2 \
    --maintenance-policy TERMINATE --restart-on-failure \
    --image-family common-cu110 \
    --image-project deeplearning-platform-release \
