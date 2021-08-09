@@ -32,5 +32,8 @@ docker run -it --rm --gpus all \
 gcr.io/jk-mlops-dev/merlin-preprocess \
 python preprocess.py \
 --training_data /training_data \
---validation_data /validation_data
+--validation_data /validation_data \
+--device_limit_frac 0.6 \
+--device_pool_frac 0.6 \
+--part_mem_frac 0.08
 ```
