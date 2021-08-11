@@ -244,19 +244,19 @@ if __name__ == '__main__':
     parser.add_argument('--part_mem_frac',
                         type=float,
                         required=False,
-                        default=0.08,
+                        default=0.12,
                         help='Desired maximum size of each partition as a fraction of total GPU memory')
     
     parser.add_argument('--device_limit_frac',
                         type=float,
                         required=False,
-                        default=0.5,
+                        default=0.7,
                         help='Device limit fraction')
 
     parser.add_argument('--device_pool_frac',
                         type=float,
                         required=False,
-                        default=0.5,
+                        default=0.7,
                         help='Device pool fraction')
 
     args = parser.parse_args()
