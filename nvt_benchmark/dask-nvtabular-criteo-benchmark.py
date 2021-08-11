@@ -212,7 +212,9 @@ def main(args):
         on_host=not args.cats_on_device,
     )
     processor = Workflow(cat_features + cont_features + label_name, client=client)
-
+    
+    print('**data_path: ', data_path)
+    
     dataset = Dataset(data_path, "parquet", part_size=part_size)
 
     # Execute the dask graph
