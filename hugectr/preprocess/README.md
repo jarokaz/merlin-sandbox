@@ -8,5 +8,5 @@ python /src/merlin-sandbox/hugectr/preprocess/nvt-preprocess.py \
 --input_data_dir /data/criteo_parquet \
 --output_dir /data/output_full \
 --n_train_days 21 \
---n_val_days 3 
+--n_val_days 3  
 ```

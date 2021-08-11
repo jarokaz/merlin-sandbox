@@ -81,9 +81,9 @@ def run_preprocessing(input_path, base_dir, num_train_days, num_val_days, num_gp
     # Single-Machine Multi-GPU Cluster
     protocol = "tcp"             # "tcp" or "ucx"
     visible_devices = ",".join([str(n) for n in num_gpus])  # Delect devices to place workers
-    device_limit_frac = 0.4      # Spill GPU-Worker memory to host at this limit.
-    device_pool_frac = 0.5
-    part_mem_frac = 0.05 # Desired maximum size of each partition as a fraction of total GPU memory.
+    device_limit_frac = args.device_limit_frac      # Spill GPU-Worker memory to host at this limit.
+    device_pool_frac = args.device_pool_frac
+    part_mem_frac = args.part_mem_frac # Desired maximum size of each partition as a fraction of total GPU memory.
 
     # Use total device size to calculate args.device_limit_frac
     device_size = device_mem_size(kind="total")
@@ -240,6 +240,24 @@ if __name__ == '__main__':
                         required=False,
                         default=[0,1],
                         help='GPU devices to use for Preprocessing')
+
+    parser.add_argument('--part_mem_frac',
+                        type=float,
+                        required=False,
+                        default=0.08,
+                        help='Desired maximum size of each partition as a fraction of total GPU memory')
+    
+    parser.add_argument('--device_limit_frac',
+                        type=float,
+                        required=False,
+                        default=0.5,
+                        help='Device limit fraction')
+
+    parser.add_argument('--device_pool_frac',
+                        type=float,
+                        required=False,
+                        default=0.5,
+                        help='Device pool fraction')
 
     args = parser.parse_args()
 
