@@ -1,0 +1,4 @@
+
+FROM nvcr.io/nvidia/merlin/merlin-training:0.5.3 
+
+RUN pip install bokeh
