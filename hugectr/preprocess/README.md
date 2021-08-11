@@ -6,11 +6,11 @@ docker run -it --rm --gpus all \
 nvcr.io/nvidia/merlin/merlin-training:0.5.3 \
 python /src/merlin-sandbox/nvt_benchmark/dask-nvtabular-criteo-benchmark.py \
 --data-path /data/criteo_parquet \
---output-path /data/output_benchmark \
+--out-path /data/output_benchmark \
 --devices "0,1" \
 --device-limit-frac 0.8 \
 --device-pool-frac 0.9 \
 --num-io-threads 0 \
---part-mem_frac 0.125 \
+--part-mem-frac 0.125 \
 --profile /data/output_benchmark/dask-report.html
 ```
