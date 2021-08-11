@@ -209,21 +209,21 @@ if __name__ == '__main__':
                         '--input_data_dir',
                         type=str,
                         required=False,
-                        default='/crit_int_pq',
-                        help='Path to Preprocessed Test Data Dir. Default is /crit_int_pq')
+                        default='/data/input',
+                        help='Path to Preprocessed Test Data Dir. Default is /data/input')
 
     parser.add_argument('-o',
                         '--output_dir',
                         type=str,
                         required=False,
-                        default='/var/lib/data/criteo-data/',
+                        default='/data/output',
                         help='Path for Output directory. It will create a directory "test_dask" to store artifacts. Default is /var/lib/data/criteo-data/')
 
     parser.add_argument('-t',
                         '--n_train_days',
                         type=int,
                         required=False,
-                        default=1,
+                        default=2,
                         help='Number of Criteo data days to use for training dataset. Default is 1. Keep n_train_days + n_val_days<=24')
 
     parser.add_argument('-v',
@@ -238,7 +238,7 @@ if __name__ == '__main__':
                         nargs='+',
                         type=int,
                         required=False,
-                        default=[0,1,2,3,4,5,6,7],
+                        default=[0,1],
                         help='GPU devices to use for Preprocessing')
 
     args = parser.parse_args()
