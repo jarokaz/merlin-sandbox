@@ -9,6 +9,5 @@ python /src/merlin-sandbox/hugectr/preprocess/nvt-preprocess.py \
 --out_dir /data/output_fullj \
 --device_limit_frac 0.8 \
 --device_pool_frac 0.9 \
---num-io-threads 0 \
 --part_mem_frac 0.125 \
 ```
