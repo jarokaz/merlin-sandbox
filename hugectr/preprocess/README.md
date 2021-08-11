@@ -8,5 +8,8 @@ python /src/merlin-sandbox/hugectr/preprocess/nvt-preprocess.py \
 --input_data_dir /data/criteo_parquet \
 --output_dir /data/output_full \
 --n_train_days 21 \
---n_val_days 3  
+--n_val_days 3 \
+--device_limit_frac 0.7 \
+--device_pool_frac 0.7 \
+--part_mem_frac 0.09
 ```
