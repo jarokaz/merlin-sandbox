@@ -17,6 +17,7 @@
 # Standard Libraries
 import argparse
 import logging
+import os
 
 import hugectr
 from mpi4py import MPI
@@ -27,6 +28,7 @@ def train(input_train, input_val, max_iter,
                 dense_model_file, sparse_model_files):
 
     logging.info(f"GPU Devices: {num_gpus}")
+
 
     # Configure and define the HugeCTR model
     solver = hugectr.solver_parser_helper(num_epochs = 0,
@@ -123,6 +125,8 @@ def train(input_train, input_val, max_iter,
     model.compile()
     model.summary()
     model.fit()
+
+    logging.info('Training completed.')
 
 
 if __name__ == '__main__':
