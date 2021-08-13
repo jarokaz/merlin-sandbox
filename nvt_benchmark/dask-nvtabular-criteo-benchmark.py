@@ -223,14 +223,14 @@ def main(args):
     runtime = time.time()
 
     start_time = time.time()
-    print(f"Starting fitting the preprocessing workflow on a training dataset. Datetime: {start_time}")
+    print("Starting fitting the preprocessing workflow on a training dataset. Datetime: {}".format(datetime.now()))
     processor.fit(dataset)
     end_time = time.time()
     fit_elapsed_time = end_time - start_time
-    print('Fitting completed. Datetime: {}, Elapsed time: {}'.format(end_time, fit_elapsed_time))
+    print('Fitting completed. Elapsed time: {}'.format(fit_elapsed_time))
 
     start_time = time.time()
-    print(f"Starting the preprocessing workflow. Datetime: {start_time}")
+    print("Starting the preprocessing workflow. Datetime: {}".format(datetime.now()))
     if args.profile is not None:
         with performance_report(filename=args.profile):
             processor.transform(dataset).to_parquet(
@@ -248,7 +248,7 @@ def main(args):
         )
     end_time = time.time()
     process_elapsed_time = end_time - start_time
-    print('Processing completed. Datetime: {}, Elapsed time: {}'.format(end_time, process_elapsed_time))
+    print('Processing completed. Elapsed time: {}'.format(process_elapsed_time))
     
     runtime = time.time() - runtime
 
