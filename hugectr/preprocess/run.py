@@ -33,7 +33,7 @@ def run(args):
         staging_bucket=args.gcs_bucket
     )
 
-    job_name = 'NVT_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
+    job_name = 'NVT_BENCHMARK_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
 
     worker_pool_specs =  [
         {
