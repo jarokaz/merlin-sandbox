@@ -110,7 +110,7 @@ if __name__ == '__main__':
                         help='Criteo parquet data location')
     parser.add_argument('----out-path',
                         type=str,
-                        default='/gcs/jk-vertex-us-central1/benchmark-jobs',
+                        default='/gcs/jk-vertex-us-central1',
                         help='Output GCS location')
     parser.add_argument("--protocol",
                         choices=["tcp", "ucx"],
