@@ -54,7 +54,7 @@ def run(args):
                     '--device_limit_frac=' + str(args.device_limit_frac), 
                     '--device_pool_frac=' + str(args.device_pool_frac), 
                     '--part_mem_frac=' + str(args.part_mem_frac),
-                    '--num_gpus=' + str(args.num_gpus),
+                    #'--num_gpus=' + str(args.num_gpus),
                 ],
             },
         }
@@ -101,7 +101,7 @@ if __name__ == '__main__':
                         help='Num of GPUs')
     parser.add_argument('--input_data_dir',
                         type=str,
-                        default='/gcs/jk-vertex-us-central1/criteo-parquet',
+                        default='/gcs/jk-vertex-us-central1/criteo-parquet/criteo-parque',
                         help='Criteo parquet data location')
     parser.add_argument('--output_dir',
                         type=str,
