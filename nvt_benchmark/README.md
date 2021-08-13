@@ -8,11 +8,10 @@ docker build -t nvt-benchmark .
 ```
 docker run -it --rm --gpus all \
 -v /mnt/disks/criteo:/data \
--v /home/jupyter/src:/src \
 nvt-benchmark \
-python /src/merlin-sandbox/nvt_benchmark/dask-nvtabular-criteo-benchmark.py \
---data-path /data/criteo_parquet \
---out-path /data/output_benchmark \
+python dask-nvtabular-criteo-benchmark.py \
+--data-path /data/criteo-benchmark-test \
+--out-path /data/nvt_benchmark \
 --devices "0,1" \
 --device-limit-frac 0.8 \
 --device-pool-frac 0.9 \
@@ -25,10 +24,9 @@ python /src/merlin-sandbox/nvt_benchmark/dask-nvtabular-criteo-benchmark.py \
 
 ```
 docker run -it --rm --gpus all \
--v /home/jupyter/src:/src \
 nvt-benchmark \
-python /src/merlin-sandbox/nvt_benchmark/dask-nvtabular-criteo-benchmark.py \
---data-path gs://jk-vertex-us-central1/criteo-parquet/criteo-parque \
+python dask-nvtabular-criteo-benchmark.py \
+--data-path gs://jk-vertex-us-central1/criteo-benchmark-test \
 --out-path gs://jk-vertex-us-central1/nvt_benchmark \
 --devices "0,1" \
 --device-limit-frac 0.8 \
@@ -38,18 +36,5 @@ python /src/merlin-sandbox/nvt_benchmark/dask-nvtabular-criteo-benchmark.py \
 --profile /src/dask-report.html
 ```
 
-```
-docker run -it --rm --gpus all \
--v /home/jupyter/src:/src \
-nvt-benchmark \
-python /src/merlin-sandbox/nvt_benchmark/dask-nvtabular-criteo-benchmark.py \
---data-path gs://workshop-datasets/criteo-parque \
---out-path gs://jk-vertex-us-central1/nvt_benchmark \
---devices "0,1" \
---device-limit-frac 0.8 \
---device-pool-frac 0.9 \
---num-io-threads 0 \
---part-mem-frac 0.125 \
---profile /src/dask-report.html
-```
+
 

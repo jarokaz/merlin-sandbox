@@ -23,6 +23,8 @@ import warnings
 import argparse
 import logging
 
+from datetime import datetime
+
 # External Dependencies
 import numpy as np
 import cupy as cp
@@ -170,24 +172,33 @@ def run_preprocessing(input_path, base_dir, num_train_days, num_val_days, num_gp
     if not os.path.exists(output_valid_dir):
         os.makedirs(output_valid_dir)
 
-    logging.info("Workflow Fit..")
+    start_time = datetime.now()
+    logging.info(f"Starting fitting the preprocessing workflow on a training dataset. Datetime: {start_time}")
     workflow.fit(train_dataset)
+    end_time = datetime.now()
+    logging.info('Fitting completed. Datetime: {}, Elapsed time: {}'.format(end_time, end_time-start_time))
+    
 
-    logging.info("Transform Training data..")
+    start_time = datetime.now()
+    logging.info(f"Starting  the preprocessing workflow on a training dataset. Datetime: {start_time}")
     workflow.transform(train_dataset).to_parquet(output_path=output_train_dir,
                                              shuffle=nvt.io.Shuffle.PER_PARTITION,
                                              dtypes=dict_dtypes,
                                              cats=CATEGORICAL_COLUMNS,
                                              conts=CONTINUOUS_COLUMNS,
                                              labels=LABEL_COLUMNS)
+    end_time = datetime.now()
+    logging.info('Processing completed. Datetime: {}, Elapsed time: {}'.format(end_time, end_time-start_time))
 
-    logging.info("Transform Validation data..")
+    start_time = datetime.now()
+    logging.info(f"Starting the preprocessing workflow on a validation datasets. Datetime: {start_time}")
     workflow.transform(valid_dataset).to_parquet(output_path=output_valid_dir,
                                                  dtypes=dict_dtypes,
                                                  cats=CATEGORICAL_COLUMNS,
                                                  conts=CONTINUOUS_COLUMNS,
                                                  labels=LABEL_COLUMNS)
-
+    end_time = datetime.now()
+    logging.info('Processing completed. Datetime: {}, Elapsed time: {}'.format(end_time, end_time-start_time))
 
     # use these printed out cardinalities list in the  "slot_size_array" in the HugeCTR training "dcn_parquet.json"
     cardinalities = []
@@ -265,8 +276,11 @@ if __name__ == '__main__':
 
     logging.info(f"Args: {args}")
 
+    start_time = datetime.now()
     run_preprocessing(input_path=args.input_data_dir,
                     base_dir=args.output_dir,
                     num_train_days=args.n_train_days,
                     num_val_days=args.n_val_days,
                     num_gpus=args.num_gpus)
+    end_time = datetime.now()
+    logging.info('The job completed successfully. Datetime: {}, Total Elapsed time: {}'.format(end_time, end_time-start_time))

@@ -20,6 +20,8 @@ import shutil
 import time
 import warnings
 
+from datetime import datetime
+
 try:
     import boto3
 except ImportError:
@@ -220,8 +222,15 @@ def main(args):
     # Execute the dask graph
     runtime = time.time()
 
+    start_time = datetime.now()
+    print(f"Starting fitting the preprocessing workflow on a training dataset. Datetime: {start_time}")
     processor.fit(dataset)
+    end_time = datetime.now()
+    fit_elapsed_time = end_time - start_time
+    print('Fitting completed. Datetime: {}, Elapsed time: {}'.format(end_time, fit_elapsed_time))
 
+    start_time = datetime.now()
+    print(f"Starting the preprocessing workflow. Datetime: {start_time}")
     if args.profile is not None:
         with performance_report(filename=args.profile):
             processor.transform(dataset).to_parquet(
@@ -237,6 +246,10 @@ def main(args):
             shuffle=shuffle,
             out_files_per_proc=out_files_per_proc,
         )
+    end_time = datetime.now()
+    process_elapsed_time = end_time - start_time
+    print('Processing completed. Datetime: {}, Elapsed time: {}'.format(end_time, process_elapsed_time))
+    
     runtime = time.time() - runtime
 
     print("\nDask-NVTabular DLRM/Criteo benchmark")
@@ -250,7 +263,11 @@ def main(args):
     print(f"shuffle            | {args.shuffle}")
     print(f"cats-on-device     | {args.cats_on_device}")
     print("======================================")
-    print(f"Runtime[s]         | {runtime}")
+    print(f"Total runtime[s]       | {runtime}")
+    print("======================================\n")
+    print(f"Fit runtime[s]         | {fit_elapsed_time}")
+    print("======================================\n")
+    print(f"Process runtime[s]     | {process_elapsed_time}")
     print("======================================\n")
 
     client.close()

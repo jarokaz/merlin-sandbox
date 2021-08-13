@@ -15,6 +15,19 @@ python preprocess.py \
 --part_mem_frac 0.1
 ```
 
+```
+docker run -it --rm --gpus all \
+gcr.io/jk-mlops-dev/merlin-preprocess \
+python preprocess.py \
+--input_data_dir gs://jk-vertex-us-central1/criteo-parquet/criteo-parque \
+--output_dir gs://jk-vertex-us-central1/nvt-testing/output_test \
+--n_train_days 2 \
+--n_val_days 1 \
+--device_limit_frac 0.7 \
+--device_pool_frac 0.7 \
+--part_mem_frac 0.1
+```
+
 
 ## Train
 
