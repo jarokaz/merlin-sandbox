@@ -1,14 +1,15 @@
 
 ```
-docker build -t nvt-benchmark .
+docker build -t gcr.io/jk-mlops-dev/nvt-benchmark .
+docker push gcr.io/jk-mlops-dev/nvt-benchmark 
 ```
 
-## SSD PD
+## Local PD
 
 ```
 docker run -it --rm --gpus all \
 -v /mnt/disks/criteo:/data \
-nvt-benchmark \
+gcr.io/jk-mlops-dev/nvt-benchmark \
 python dask-nvtabular-criteo-benchmark.py \
 --data-path /data/criteo-benchmark-test \
 --out-path /data/nvt_benchmark \
@@ -24,7 +25,7 @@ python dask-nvtabular-criteo-benchmark.py \
 
 ```
 docker run -it --rm --gpus all \
-nvt-benchmark \
+gcr.io/jk-mlops-dev/nvt-benchmark \
 python dask-nvtabular-criteo-benchmark.py \
 --data-path gs://jk-vertex-us-central1/criteo-benchmark-test \
 --out-path gs://jk-vertex-us-central1/nvt_benchmark \
