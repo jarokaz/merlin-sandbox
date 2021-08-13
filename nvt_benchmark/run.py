@@ -22,7 +22,7 @@ import time
 from google.cloud import aiplatform
 
 
-PREPROCESS_FILE = 'preprocess.py'
+PREPROCESS_FILE = 'dask-nvtabular-criteo-benchmark.py'
 
 
 def run(args):
@@ -33,7 +33,7 @@ def run(args):
         staging_bucket=args.gcs_bucket
     )
 
-    job_name = 'NVT_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
+    job_name = 'NVT_BENCHMARK_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
 
     worker_pool_specs =  [
         {
@@ -47,14 +47,14 @@ def run(args):
                 "image_uri": args.preprocess_image,
                 "command": ["python", PREPROCESS_FILE],
                 "args": [
-                    '--input_data_dir=' + args.input_data_dir, 
-                    '--output_dir=' + f'{args.output_dir}/{job_name}',
-                    '--n_train_days=' + str(args.n_train_days),
-                    '--n_val_days=' + str(args.n_val_days), 
+                    '--data-path=' + args.data_path, 
+                    '--out-path=' + f'{args.out_path}/{job_name}',
+                    '--devices=' + args.devices,
+                    '--protocol=' + args.protocol, 
                     '--device_limit_frac=' + str(args.device_limit_frac), 
                     '--device_pool_frac=' + str(args.device_pool_frac), 
                     '--part_mem_frac=' + str(args.part_mem_frac),
-                    #'--num_gpus=' + str(args.num_gpus),
+                    '--num_io_threads=' + str(args.num_io_threads),
                 ],
             },
         }
@@ -99,46 +99,50 @@ if __name__ == '__main__':
                         type=int,
                         default=2,
                         help='Num of GPUs')
-    parser.add_argument('--input_data_dir',
-                        type=str,
-                        default='/gcs/jk-vertex-us-central1/criteo-parquet/criteo-parque',
-                        help='Criteo parquet data location')
-    parser.add_argument('--output_dir',
-                        type=str,
-                        default='/gcs/jk-vertex-us-central1/nvt-jobs',
-                        help='Output GCS location')
     parser.add_argument('--preprocess_image',
                         type=str,
-                        default='gcr.io/jk-mlops-dev/merlin-preprocess',
+                        default='gcr.io/jk-mlops-dev/nvt-benchmark',
                         help='Training image name')
-    parser.add_argument('--n_train_days',
-                        type=int,
-                        default=2,
-                        help='Num of train days')
-    parser.add_argument('--n_val_days',
-                        type=int,
-                        default=1,
-                        help='Num of validation days')
-    parser.add_argument('--num_gpus',
-                        nargs='+',
-                        type=int,
-                        default=[0,1],
-                        help='GPU devices to use for Preprocessing')
+
+    parser.add_argument('---data-path',
+                        type=str,
+                        default='/gcs/jk-vertex-us-central1/criteo-benchmark-test',
+                        help='Criteo parquet data location')
+    parser.add_argument('----out-path',
+                        type=str,
+                        default='/gcs/jk-vertex-us-central1/benchmark-jobs',
+                        help='Output GCS location')
+    parser.add_argument("--protocol",
+                        choices=["tcp", "ucx"],
+                        default="tcp",
+                        type=str,
+                        help="Communication protocol to use (Default 'tcp')")
     parser.add_argument('--part_mem_frac',
                         type=float,
                         required=False,
-                        default=0.10,
+                        default=0.125,
                         help='Desired maximum size of each partition as a fraction of total GPU memory')
     parser.add_argument('--device_limit_frac',
                         type=float,
                         required=False,
-                        default=0.7,
+                        default=0.8,
                         help='Device limit fraction')
     parser.add_argument('--device_pool_frac',
                         type=float,
                         required=False,
-                        default=0.7,
+                        default=0.9,
                         help='Device pool fraction')
+    parser.add_argument("--num-io-threads",
+                        default=0,
+                        type=int,
+                        help="Number of threads to use when writing output data (Default 0). "
+                        "If 0 is specified, multi-threading will not be used for IO.")
+    parser.add_argument("--devices",
+                        default="0,1",
+                        type=str,
+                        help='Comma-separated list of visible devices (e.g. "0,1,2,3"). '
+                        "The number of visible devices dictates the number of Dask workers (GPU processes) "
+                        "The CUDA_VISIBLE_DEVICES environment variable will be used by default")
 
     args = parser.parse_args()
 

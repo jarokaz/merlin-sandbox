@@ -222,14 +222,14 @@ def main(args):
     # Execute the dask graph
     runtime = time.time()
 
-    start_time = datetime.now()
+    start_time = time.time()
     print(f"Starting fitting the preprocessing workflow on a training dataset. Datetime: {start_time}")
     processor.fit(dataset)
-    end_time = datetime.now()
+    end_time = time.time()
     fit_elapsed_time = end_time - start_time
     print('Fitting completed. Datetime: {}, Elapsed time: {}'.format(end_time, fit_elapsed_time))
 
-    start_time = datetime.now()
+    start_time = time.time()
     print(f"Starting the preprocessing workflow. Datetime: {start_time}")
     if args.profile is not None:
         with performance_report(filename=args.profile):
@@ -246,7 +246,7 @@ def main(args):
             shuffle=shuffle,
             out_files_per_proc=out_files_per_proc,
         )
-    end_time = datetime.now()
+    end_time = time.time()
     process_elapsed_time = end_time - start_time
     print('Processing completed. Datetime: {}, Elapsed time: {}'.format(end_time, process_elapsed_time))
     
