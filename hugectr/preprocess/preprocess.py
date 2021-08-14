@@ -183,6 +183,7 @@ def run_preprocessing(input_path, base_dir, num_train_days, num_val_days, num_gp
     logging.info(f"Starting  the preprocessing workflow on a training dataset. Datetime: {start_time}")
     workflow.transform(train_dataset).to_parquet(output_path=output_train_dir,
                                              shuffle=nvt.io.Shuffle.PER_PARTITION,
+                                             out_files_per_proc=args.out_files_per_proc,
                                              dtypes=dict_dtypes,
                                              cats=CATEGORICAL_COLUMNS,
                                              conts=CONTINUOUS_COLUMNS,
@@ -269,6 +270,12 @@ if __name__ == '__main__':
                         required=False,
                         default=0.7,
                         help='Device pool fraction')
+
+    parser.add_argument('--out_files_per_proc',
+                        type=int,
+                        required=False,
+                        default=1,
+                        help='Number of files per processor')
 
     args = parser.parse_args()
 

@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/merlin/merlin-training:0.5.3
+FROM nvcr.io/nvidia/merlin/merlin-training:0.5.1
 
 WORKDIR /src
 

@@ -32,7 +32,7 @@ def run(args):
         location=args.region,
         staging_bucket=args.gcs_bucket
     )
-
+    
     worker_pool_specs =  [
         {
             "machine_spec": {
@@ -49,6 +49,7 @@ def run(args):
                     '--input_val=' + args.input_val,
                     '--max_iter=' + str(args.max_iter),
                     '--eval_interval=' + str(args.eval_interval),
+                    '--num_gpus ' + str(args.num_gpus)[1:-1],
                 ],
             },
         }
@@ -97,11 +98,11 @@ if __name__ == '__main__':
                         help='Num of GPUs')
     parser.add_argument('--input_train',
                         type=str,
-                        default='/gcs/jk-vertex-us-central1/criteo-processed/train/_file_list.txt',
+                        default='/gcs/jk-vertex-us-central1/criteo-full-processed/train/_file_list.txt',
                         help='Training data location')
     parser.add_argument('--input_val',
                         type=str,
-                        default='/gcs/jk-vertex-us-central1/criteo-processed/valid/_file_list.txt',
+                        default='/gcs/jk-vertex-us-central1/criteo-full-processed/valid/_file_list.txt',
                         help='Validation data location')
     parser.add_argument('--train_image',
                         type=str,
@@ -109,18 +110,26 @@ if __name__ == '__main__':
                         help='Training image name')
     parser.add_argument('--max_iter',
                         type=int,
-                        default=5000,
-                        help='Num of GPUs')
+                        default=10000,
+                        help='Num of training iterations')
     parser.add_argument('--eval_interval',
                         type=int,
-                        default=500,
+                        default=1000,
                         help='Run evaluation after given number of iterations')
     parser.add_argument('--batchsize',
                         type=int,
                         default=2048,
                         help='Batch size')
+    parser.add_argument('-g',
+                        '--num_gpus',
+                        nargs='+',
+                        type=int,
+                        required=False,
+                        default=[0,1],
+                        help='GPU devices to use for Preprocessing')
 
     args = parser.parse_args()
+
 
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, datefmt='%d-%m-%y %H:%M:%S')
 

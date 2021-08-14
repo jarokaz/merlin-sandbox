@@ -17,6 +17,21 @@ python preprocess.py \
 
 ```
 docker run -it --rm --gpus all \
+-v /mnt/disks/criteo:/data \
+gcr.io/jk-mlops-dev/merlin-preprocess \
+python preprocess.py \
+--input_data_dir /data/criteo_parquet \
+--output_dir /data/output_8_files \
+--n_train_days 20 \
+--n_val_days 4 \
+--device_limit_frac 0.7 \
+--device_pool_frac 0.7 \
+--part_mem_frac 0.1 \
+--out_files_per_proc 4
+```
+
+```
+docker run -it --rm --gpus all \
 gcr.io/jk-mlops-dev/merlin-preprocess \
 python preprocess.py \
 --input_data_dir gs://jk-vertex-us-central1/criteo-parquet/criteo-parque \
