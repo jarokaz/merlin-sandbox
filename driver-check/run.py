@@ -43,7 +43,7 @@ def run(args):
             },
             "replica_count": 1,
             "container_spec": {
-                "image_uri": args.preprocess_image,
+                "image_uri": args.image,
                 "command": ["nvidia-smi"],
                 #"args": [ ],
             },
