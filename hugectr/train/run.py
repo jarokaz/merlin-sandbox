@@ -32,7 +32,9 @@ def run(args):
         location=args.region,
         staging_bucket=args.gcs_bucket
     )
-    
+
+    num_gpus = ' '.join(map(str, range(args.accelerator_num)))
+
     worker_pool_specs =  [
         {
             "machine_spec": {
@@ -49,7 +51,7 @@ def run(args):
                     '--input_val=' + args.input_val,
                     '--max_iter=' + str(args.max_iter),
                     '--eval_interval=' + str(args.eval_interval),
-                    '--num_gpus ' + str(args.num_gpus)[1:-1],
+                    '--num_gpus ' + num_gpus,
                 ],
             },
         }
@@ -120,13 +122,6 @@ if __name__ == '__main__':
                         type=int,
                         default=2048,
                         help='Batch size')
-    parser.add_argument('-g',
-                        '--num_gpus',
-                        nargs='+',
-                        type=int,
-                        required=False,
-                        default=[0,1],
-                        help='GPU devices to use for Preprocessing')
 
     args = parser.parse_args()
 
