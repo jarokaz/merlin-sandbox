@@ -31,9 +31,9 @@ python dask-nvtabular-criteo-benchmark.py \
 --devices "0,1" \
 --device-limit-frac 0.8 \
 --device-pool-frac 0.9 \
---num-io-threads 0 \
 --part-mem-frac 0.125 \
---profile  /out/dask-report.html
+--profile  /out/dask-report.html \
+--num-io-threads 0 
 ```
 
 
