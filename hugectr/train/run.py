@@ -33,8 +33,6 @@ def run(args):
         staging_bucket=args.gcs_bucket
     )
 
-    num_gpus = ' '.join(map(str, range(args.accelerator_num)))
-
     worker_pool_specs =  [
         {
             "machine_spec": {
@@ -51,7 +49,7 @@ def run(args):
                     '--input_val=' + args.input_val,
                     '--max_iter=' + str(args.max_iter),
                     '--eval_interval=' + str(args.eval_interval),
-                    '--num_gpus ' + num_gpus,
+                    '--num_gpus=' + ','.join(map(str, range(args.accelerator_num))),
                 ],
             },
         }

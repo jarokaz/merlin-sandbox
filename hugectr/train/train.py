@@ -167,12 +167,19 @@ if __name__ == '__main__':
                         default=10000,
                         help='Saves a model snapshot after given number of iterations')
 
+    #parser.add_argument('-g',
+    #                    '--num_gpus',
+    #                    nargs='+',
+    #                    type=int,
+    #                    required=False,
+    #                    default=[0,1],
+    #                    help='GPU devices to use for Preprocessing')
+
     parser.add_argument('-g',
                         '--num_gpus',
-                        nargs='+',
-                        type=int,
+                        type=str,
                         required=False,
-                        default=[0,1],
+                        default="0,1",
                         help='GPU devices to use for Preprocessing')
 
     parser.add_argument('-r',
@@ -198,6 +205,7 @@ if __name__ == '__main__':
                         help='Paths to an existing sparse snapshots. If provided, resumes training from here. Eg. --sparse_model_files ./model-snapshot/0_sparse_19500.model ./model-snapshot/0_sparse_19500.model')
 
     args = parser.parse_args()
+    args.num_gpus = list(map(int, args.num_gpus.split(',')))
 
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, datefmt='%d-%m-%y %H:%M:%S')
 

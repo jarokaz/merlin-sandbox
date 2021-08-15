@@ -195,6 +195,7 @@ def run_preprocessing(input_path, base_dir, num_train_days, num_val_days, num_gp
     logging.info(f"Starting the preprocessing workflow on a validation datasets. Datetime: {start_time}")
     workflow.transform(valid_dataset).to_parquet(output_path=output_valid_dir,
                                                  dtypes=dict_dtypes,
+                                                 out_files_per_proc=args.out_files_per_proc,
                                                  cats=CATEGORICAL_COLUMNS,
                                                  conts=CONTINUOUS_COLUMNS,
                                                  labels=LABEL_COLUMNS)
