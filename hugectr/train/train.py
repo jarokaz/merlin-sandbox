@@ -18,6 +18,7 @@
 import argparse
 import logging
 import os
+import time
 
 import hugectr
 from mpi4py import MPI
@@ -226,6 +227,8 @@ if __name__ == '__main__':
         dense_model_file = ""
         sparse_model_files = []
 
+    start_time = time.time()
+    logging.info("Starting training")
     train(input_train=args.input_train,
             input_val=args.input_val,
             max_iter=args.max_iter,
@@ -236,3 +239,6 @@ if __name__ == '__main__':
             dense_model_file=dense_model_file,
             sparse_model_files=sparse_model_files
             )
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logging.info("Training completed. Elapsed time: {}".format(elapsed_time))
