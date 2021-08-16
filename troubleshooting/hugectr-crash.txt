@@ -1,0 +1,111 @@
+====================================================Model Init=====================================================
+[16d20h28m10s][HUGECTR][INFO]: Global seed is 3567329653
+[16d20h28m12s][HUGECTR][INFO]: Device to NUMA mapping:
+  GPU 0 ->  node 0
+
+[16d20h28m14s][HUGECTR][INFO]: Peer-to-peer access cannot be fully enabled.
+[16d20h28m14s][HUGECTR][INFO]: Start all2all warmup
+[16d20h28m14s][HUGECTR][INFO]: End all2all warmup
+[16d20h28m14s][HUGECTR][INFO]: Using All-reduce algorithm OneShot
+Device 0: A100-SXM4-40GB
+[16d20h28m14s][HUGECTR][INFO]: num of DataReader workers: 1
+[16d20h28m14s][HUGECTR][INFO]: Vocabulary size: 4833329
+[16d20h28m14s][HUGECTR][INFO]: max_vocabulary_size_per_gpu_=1740800
+===================================================Model Compile===================================================
+[16d20h28m29s][HUGECTR][INFO]: gpu0 start to init embedding
+[16d20h28m29s][HUGECTR][INFO]: gpu0 init embedding done
+[16d20h28m29s][HUGECTR][INFO]: Starting AUC NCCL warm-up
+[16d20h28m29s][HUGECTR][INFO]: Warm-up done
+===================================================Model Summary===================================================
+Label                                   Dense                         Sparse                        
+label                                   dense                          data1                         
+(None, 1)                               (None, 0)                               
+------------------------------------------------------------------------------------------------------------------
+Layer Type                              Input Name                    Output Name                   Output Shape                  
+------------------------------------------------------------------------------------------------------------------
+DistributedSlotSparseEmbeddingHash      data1                         sparse_embedding1             (None, 26, 64)                
+Reshape                                 sparse_embedding1             reshape1                      (None, 1664)                  
+InnerProduct                            reshape1                      fc1                           (None, 200)                   
+ReLU                                    fc1                           relu1                         (None, 200)                   
+InnerProduct                            relu1                         fc2                           (None, 200)                   
+ReLU                                    fc2                           relu2                         (None, 200)                   
+InnerProduct                            relu2                         fc3                           (None, 200)                   
+ReLU                                    fc3                           relu3                         (None, 200)                   
+InnerProduct                            relu3                         fc4                           (None, 1)                     
+BinaryCrossEntropyLoss                  fc4,label                     loss                                                        
+------------------------------------------------------------------------------------------------------------------
+=====================================================Model Fit=====================================================
+[16d20h28m29s][HUGECTR][INFO]: Use non-epoch mode with number of iterations: 2300
+[16d20h28m29s][HUGECTR][INFO]: Training batchsize: 16384, evaluation batchsize: 16384
+[16d20h28m29s][HUGECTR][INFO]: Evaluation interval: 1000, snapshot interval: 1000000
+[16d20h28m29s][HUGECTR][INFO]: Sparse embedding trainable: 1, dense network trainable: 1
+[16d20h28m29s][HUGECTR][INFO]: Use mixed precision: 0, scaler: 1.000000, use cuda graph: 1
+[16d20h28m29s][HUGECTR][INFO]: lr: 0.001000, warmup_steps: 1, decay_start: 0, decay_steps: 1, decay_power: 2.000000, end_lr: 0.000000
+[16d20h28m29s][HUGECTR][INFO]: Training source file: /data/train/_file_list.txt
+[16d20h28m29s][HUGECTR][INFO]: Evaluation source file: /data/val/_file_list.txt
+[16d20h28m29s][HUGECTR][INFO]: Iter: 10 Time(10 iters): 0.089988s Loss: 0.155987 lr:0.001000
+[16d20h28m29s][HUGECTR][INFO]: Iter: 20 Time(10 iters): 0.076145s Loss: 0.139560 lr:0.001000
+[16d20h28m29s][HUGECTR][INFO]: Iter: 30 Time(10 iters): 0.076083s Loss: 0.134621 lr:0.001000
+[16d20h28m29s][HUGECTR][INFO]: Iter: 40 Time(10 iters): 0.083219s Loss: 0.139467 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 50 Time(10 iters): 0.076480s Loss: 0.137799 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 60 Time(10 iters): 0.075759s Loss: 0.138046 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 70 Time(10 iters): 0.076306s Loss: 0.134234 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 80 Time(10 iters): 0.082833s Loss: 0.131967 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 90 Time(10 iters): 0.076197s Loss: 0.122198 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 100 Time(10 iters): 0.076089s Loss: 0.140925 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 110 Time(10 iters): 0.076063s Loss: 0.136191 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 120 Time(10 iters): 0.083413s Loss: 0.135404 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 130 Time(10 iters): 0.076247s Loss: 0.140561 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 140 Time(10 iters): 0.076101s Loss: 0.135578 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 150 Time(10 iters): 0.076278s Loss: 0.131734 lr:0.001000
+[16d20h28m30s][HUGECTR][INFO]: Iter: 160 Time(10 iters): 0.075792s Loss: 0.129910 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 170 Time(10 iters): 0.078189s Loss: 0.132332 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 180 Time(10 iters): 0.076092s Loss: 0.124594 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 190 Time(10 iters): 0.076333s Loss: 0.130995 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 200 Time(10 iters): 0.077276s Loss: 0.131446 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 210 Time(10 iters): 0.078247s Loss: 0.125920 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 220 Time(10 iters): 0.075937s Loss: 0.134348 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 230 Time(10 iters): 0.075896s Loss: 0.121683 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 240 Time(10 iters): 0.076261s Loss: 0.134470 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 250 Time(10 iters): 0.077946s Loss: 0.127953 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 260 Time(10 iters): 0.076190s Loss: 0.124919 lr:0.001000
+[16d20h28m31s][HUGECTR][INFO]: Iter: 270 Time(10 iters): 0.076411s Loss: 0.147416 lr:0.001000
+terminate called after throwing an instance of 'HugeCTR::internal_runtime_error'
+  what():  [HCDEBUG][ERROR] Runtime error: an illegal memory access was encountered /var/tmp/HugeCTR/HugeCTR/include/data_readers/data_collector.hpp:226 
+
+[HCDEBUG][ERROR] Runtime error: an illegal memory access was encountered /var/tmp/HugeCTR/HugeCTR/include/data_readers/parquet_data_reader_worker.hpp:472 
+[914ee5c3120a:00476] *** Process received signal ***
+
+[914ee5c3120a:00476] Signal: Aborted (6)
+[914ee5c3120a:00476] Signal code:  (-6)
+[914ee5c3120a:00476] [ 0] /usr/lib/x86_64-linux-gnu/libc.so.6(+0x46210)[0x7f24bf42c210]
+[914ee5c3120a:00476] [ 1] /usr/lib/x86_64-linux-gnu/libc.so.6(gsignal+0xcb)[0x7f24bf42c18b]
+[914ee5c3120a:00476] [ 2] /usr/lib/x86_64-linux-gnu/libc.so.6(abort+0x12b)[0x7f24bf40b859]
+[914ee5c3120a:00476] [ 3] /usr/lib/x86_64-linux-gnu/libstdc++.so.6(+0x9e911)[0x7f24ac0cf911]
+[914ee5c3120a:00476] [ 4] /usr/lib/x86_64-linux-gnu/libstdc++.so.6(+0xaa38c)[0x7f24ac0db38c]
+[914ee5c3120a:00476] [ 5] /usr/lib/x86_64-linux-gnu/libstdc++.so.6(+0xa9369)[0x7f24ac0da369]
+[914ee5c3120a:00476] [ 6] /usr/lib/x86_64-linux-gnu/libstdc++.so.6(__gxx_personality_v0+0x2a1)[0x7f24ac0dad21]
+[914ee5c3120a:00476] [ 7] /usr/lib/x86_64-linux-gnu/libgcc_s.so.1(+0x10bef)[0x7f24abfe4bef]
+[914ee5c3120a:00476] [ 8] /usr/lib/x86_64-linux-gnu/libgcc_s.so.1(_Unwind_RaiseException+0x331)[0x7f24abfe5281]
+[914ee5c3120a:00476] [ 9] /usr/lib/x86_64-linux-gnu/libstdc++.so.6(__cxa_throw+0x3c)[0x7f24ac0db69c]
+[914ee5c3120a:00476] [10] /usr/local/hugectr/lib/libhuge_ctr_shared.so(+0x201245)[0x7f24bc32f245]
+[914ee5c3120a:00476] [11] /usr/lib/x86_64-linux-gnu/libgomp.so.1(GOMP_parallel+0x46)[0x7f24ac0018e6]
+[914ee5c3120a:00476] [12] /usr/local/hugectr/lib/libhuge_ctr_shared.so(_ZN7HugeCTR10DataReaderIxE36read_a_batch_to_device_delay_releaseEv+0x6e)[0x7f24bc9373ce]
+[914ee5c3120a:00476] [13] /usr/local/hugectr/lib/libhuge_ctr_shared.so(_ZN7HugeCTR5Model5trainEv+0x96)[0x7f24bca1dbc6]
+[914ee5c3120a:00476] [14] /usr/local/hugectr/lib/libhuge_ctr_shared.so(_ZN7HugeCTR5Model3fitEiiiiiNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE+0x158c)[0x7f24bca2a71c]
+[914ee5c3120a:00476] [15] /usr/local/hugectr/lib/hugectr.so(+0xc6253)[0x7f24bee52253]
+[914ee5c3120a:00476] [16] /usr/local/hugectr/lib/hugectr.so(+0xc2728)[0x7f24bee4e728]
+[914ee5c3120a:00476] [17] python(PyCFunction_Call+0x59)[0x5f2cc9]
+[914ee5c3120a:00476] [18] python(_PyObject_MakeTpCall+0x23f)[0x5f30ff]
+[914ee5c3120a:00476] [19] python[0x50bf55]
+[914ee5c3120a:00476] [20] python(_PyEval_EvalFrameDefault+0x18eb)[0x56bc9b]
+[914ee5c3120a:00476] [21] python(_PyEval_EvalCodeWithName+0x26a)[0x568d9a]
+[914ee5c3120a:00476] [22] python(PyEval_EvalCode+0x27)[0x68cdc7]
+[914ee5c3120a:00476] [23] python[0x67e161]
+[914ee5c3120a:00476] [24] python[0x67e1df]
+[914ee5c3120a:00476] [25] python[0x67e281]
+[914ee5c3120a:00476] [26] python(PyRun_SimpleFileExFlags+0x197)[0x67e627]
+[914ee5c3120a:00476] [27] python(Py_RunMain+0x212)[0x6b6e62]
+[914ee5c3120a:00476] [28] python(Py_BytesMain+0x2d)[0x6b71ed]
+[914ee5c3120a:00476] [29] /usr/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf3)[0x7f24bf40d0b3]
+[914ee5c3120a:00476] *** End of error message ***
