@@ -246,12 +246,19 @@ if __name__ == '__main__':
                         default=1,
                         help='Number of Criteo data days to take for validation set after n_train_days. Default is 1. Keep n_train_days + n_val_days<=24.')
 
+    #parser.add_argument('-g',
+    #                    '--num_gpus',
+    #                    nargs='+',
+    #                    type=int,
+    #                    required=False,
+    #                    default=[0,1],
+    #                    help='GPU devices to use for Preprocessing')
+    
     parser.add_argument('-g',
                         '--num_gpus',
-                        nargs='+',
-                        type=int,
+                        type=str,
                         required=False,
-                        default=[0,1],
+                        default="0,1",
                         help='GPU devices to use for Preprocessing')
 
     parser.add_argument('--part_mem_frac',
@@ -279,6 +286,7 @@ if __name__ == '__main__':
                         help='Number of files per processor')
 
     args = parser.parse_args()
+    args.num_gpus = list(map(int, args.num_gpus.split(',')))
 
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, datefmt='%d-%m-%y %H:%M:%S')
 

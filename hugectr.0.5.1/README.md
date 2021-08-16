@@ -51,17 +51,19 @@ python preprocess.py \
 docker run -it --rm --gpus all \
 -v /mnt/disks/criteo:/data \
 -v /home/jupyter/src:/src \
-nvcr.io/nvidia/merlin/merlin-training:0.5.1 \
+nvcr.io/nvidia/merlin/merlin-training:0.6 \
 python /src/merlin-sandbox/hugectr/train/train.py
 ```
 
 ```
 docker run -it --rm --gpus all \
--v /mnt/disks/criteo:/data \
+-v /mnt/nfs:/data \
 gcr.io/jk-mlops-dev/merlin-train \
 python train.py \
 --max_iter=5000 \
 --eval_interval=500 \
+--input_train=/data/criteo-processed/train \
+--input_val=/data/criteo-processed/valid \
 --num_gpus=0,1
 ```
 

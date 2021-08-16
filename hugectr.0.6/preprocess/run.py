@@ -54,7 +54,7 @@ def run(args):
                     '--device_limit_frac=' + str(args.device_limit_frac), 
                     '--device_pool_frac=' + str(args.device_pool_frac), 
                     '--part_mem_frac=' + str(args.part_mem_frac),
-                    #'--num_gpus=' + str(args.num_gpus),
+                    '--num_gpus=' + ','.join(map(str, range(args.accelerator_num))),
                 ],
             },
         }
