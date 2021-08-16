@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 
-import cudaf
+import cudf
 
 
 print("Hello World")
