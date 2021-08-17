@@ -46,7 +46,7 @@ def run(args):
                 "command": ["python", "train.py"],
                 "args": [
                     '--batchsize=' + str(args.batchsize),
-                    '--train_data' + args.train_data, 
+                    '--train_data=' + args.train_data, 
                     '--valid_data=' + args.valid_data,
                     '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
