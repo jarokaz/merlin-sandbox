@@ -4,7 +4,7 @@ solver = hugectr.CreateSolver(max_eval_batches = 300,
                               batchsize_eval = 16384,
                               batchsize = 16384,
                               lr = 0.001,
-                              vvgpu = [[0]],
+                              vvgpu = [[0,1]],
                               repeat_dataset = True,
                               i64_input_key = True)
 reader = hugectr.DataReaderParams(data_reader_type = hugectr.DataReaderType_t.Parquet,
@@ -12,6 +12,7 @@ reader = hugectr.DataReaderParams(data_reader_type = hugectr.DataReaderType_t.Pa
                                   eval_source = "/data/criteo_data/valid/_file_list.txt",
                                   check_type = hugectr.Check_t.Non,
                                   slot_size_array = [3673278, 28922, 15432, 7229, 19673, 4, 6605, 1315, 63, 2733920, 376536, 191906, 11, 2209, 9663, 74, 4, 957, 15, 3752950, 1427075, 3390584, 231060, 10906, 92, 35])
+                                  #slot_size_array = [3673278, 28922, 15432, 7229, 19673, 4, 6605, 1315, 63, 2733920, 376536, 191906, 11, 2209, 9663, 74, 4, 957, 15, 3752950, 1427075, 3390584, 231060, 10906, 92, 35])
 optimizer = hugectr.CreateOptimizer(optimizer_type = hugectr.Optimizer_t.Adam,
                                     update_type = hugectr.Update_t.Local,
                                     beta1 = 0.9,
@@ -23,7 +24,8 @@ model.add(hugectr.Input(label_dim = 1, label_name = "label",
                         data_reader_sparse_param_array = 
                         [hugectr.DataReaderSparseParam("data1", 2, False, 26)]))
 model.add(hugectr.SparseEmbedding(embedding_type = hugectr.Embedding_t.DistributedSlotSparseEmbeddingHash, 
-                            workspace_size_per_gpu_in_mb = 425,
+                            workspace_size_per_gpu_in_mb = 2000,
+                            #workspace_size_per_gpu_in_mb = 425,
                             embedding_vec_size = 64,
                             combiner = "sum",
                             sparse_embedding_name = "sparse_embedding1",
@@ -63,4 +65,4 @@ model.add(hugectr.DenseLayer(layer_type = hugectr.Layer_t.BinaryCrossEntropyLoss
                             top_names = ["loss"]))
 model.compile()
 model.summary()
-model.fit(max_iter = 2300, display = 10, eval_interval = 1000, snapshot = 1000000, snapshot_prefix = "deepfm")
+model.fit(max_iter = 23000, display = 10, eval_interval = 1000, snapshot = 1000000, snapshot_prefix = "deepfm")

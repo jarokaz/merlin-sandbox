@@ -12,8 +12,10 @@ docker push gcr.io/jk-mlops-dev/merlin-preprocess
 ```
 docker run -it --rm --gpus all \
 -v /mnt/disks/criteo:/data \
-gcr.io/jk-mlops-dev/merlin-preprocess \
-python preprocess_nvt.py \
+-v /home/jupyter/src/merlin-sandbox:/src \
+-w /src \
+nvcr.io/nvidia/merlin/merlin-training:0.5.3 \
+python /src/hugectr/preprocess/preprocess_nvt.py \
 --train_dir=/data/train_parquet \
 --valid_dir=/data/valid_parquet \
 --output_dir=/data/criteo_data \
@@ -34,10 +36,17 @@ python preprocess_nvt.py \
 ## Train
 
 ```
+docker build -t gcr.io/jk-mlops-dev/merlin-train .
+docker push gcr.io/jk-mlops-dev/merlin-train
+```
+
+
+```
 docker run -it --rm --gpus all --cap-add SYS_NICE \
--v /mnt/disks/criteo/criteo_data:/data/criteo_data \
-gcr.io/jk-mlops-dev/merlin-training \
-python criteo_parquet.py
+-v /mnt/disks/criteo:/data \
+-v /home/jupyter/src/merlin-sandbox:/src \
+nvcr.io/nvidia/merlin/merlin-training:0.6 \
+python /src/hugectr/train/criteo_parquet.py
 ```
 
 ```
@@ -49,15 +58,16 @@ python /src/merlin-sandbox/hugectr/train/train.py
 ```
 
 ```
-docker run -it --rm --gpus all \
--v /mnt/nfs:/data \
+docker run -it --rm --gpus all --cap-add SYS_NICE \
+-v /mnt/disks/criteo:/data \
 gcr.io/jk-mlops-dev/merlin-train \
 python train.py \
 --max_iter=5000 \
 --eval_interval=500 \
---input_train=/data/criteo-processed/train \
---input_val=/data/criteo-processed/valid \
---num_gpus=0,1
+--batchsize=2048 \
+--train_data=/data/criteo_data/train/_file_list.txt \
+--valid_data=/data/criteo_data/valid/_file_list.txt \
+--gpus=0,1
 ```
 
 
