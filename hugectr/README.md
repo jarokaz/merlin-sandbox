@@ -70,6 +70,20 @@ python train.py \
 --gpus=0,1
 ```
 
+```
+docker run -it --rm --gpus all --cap-add SYS_NICE \
+-v /mnt/disks/criteo:/data \
+gcr.io/jk-mlops-dev/merlin-train \
+python train.py \
+--max_iter=5000 \
+--eval_interval=500 \
+--batchsize=2048 \
+--train_data=gs://jk-vertex-us-central1/criteo_data/train/_file_list.txt \
+--valid_data=gs://jk-vertex-us-central1/criteo_data/valid/_file_list.txt \
+--gpus=0,1
+```
+
+
 
 ## Create filestore
 
