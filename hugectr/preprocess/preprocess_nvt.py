@@ -3,9 +3,10 @@ from re import I
 import sys
 import argparse
 import glob
-import time
-import shutil
+import logging
 import numpy as np
+import shutil
+import time
 import warnings
 
 import cudf
@@ -18,13 +19,11 @@ from dask.utils import parse_bytes
 from dask.delayed import delayed
 
 import rmm
+
 import nvtabular as nvt
 from nvtabular.io import Shuffle
 from nvtabular.utils import _pynvml_mem_size, device_mem_size
 from nvtabular.ops import Categorify, Clip, FillMissing, HashBucket, LambdaOp, Normalize, Rename, Operator, get_embedding_sizes
-#%load_ext memory_profiler
-
-import logging
 
 
 # define dataset schema
@@ -32,14 +31,6 @@ CATEGORICAL_COLUMNS=["C" + str(x) for x in range(1, 27)]
 CONTINUOUS_COLUMNS=["I" + str(x) for x in range(1, 14)]
 LABEL_COLUMNS = ['label']
 COLUMNS =  LABEL_COLUMNS + CONTINUOUS_COLUMNS +  CATEGORICAL_COLUMNS
-
-
-NUM_INTEGER_COLUMNS = 13
-NUM_CATEGORICAL_COLUMNS = 26
-NUM_TOTAL_COLUMNS = 1 + NUM_INTEGER_COLUMNS + NUM_CATEGORICAL_COLUMNS
-
-
-
 
 
 def bytesto(bytes, to, bsize=1024):
@@ -121,7 +112,7 @@ def preprocess(args):
     workflow_output_folder = os.path.join(args.output_folder, 'workflow')
 
     # Make sure we have a clean parquet space for cudf conversion
-    for one_path in [train_output_folder, valid_output_folder, stats_output_folder]:
+    for one_path in [train_output_folder, valid_output_folder, stats_output_folder, workflow_output_folder]:
         if os.path.exists(one_path):
             shutil.rmtree(one_path)
         os.makedirs(one_path)
