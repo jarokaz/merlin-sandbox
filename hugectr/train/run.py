@@ -141,7 +141,7 @@ if __name__ == '__main__':
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,
                         required=False,
-                        default=1000,
+                        default=4000,
                         help='Workspace size per gpu in MB')
     parser.add_argument('--eval_interval',
                         type=int,
