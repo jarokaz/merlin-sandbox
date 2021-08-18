@@ -7,14 +7,14 @@ import hugectr
 
 from mpi4py import MPI
 
-SLOT_SIZE_ARRAY = [1461, 558, 335378, 211710, 306, 20, 12136, 634, 4, 51298, 5302, 332600, 3179, 27, 12191, 301211, 11, 4841, 2086, 4, 324273, 17, 16, 79734, 96, 58622] 
-
+SLOT_SIZE_ARRAY = [16961592, 34319, 16768, 7378, 20132, 4, 6955, 1384, 63, 11492137, 914596, 289081, 11, 2209, 10737, 79, 4, 971, 15, 17618173, 5049264, 15182940, 364088, 12075, 102, 35]
 
 def train(
     train_data,
     valid_data, 
     slot_size_array,
     max_iter,
+    num_epochs,
     snapshot,
     eval_interval,
     display_interval,
@@ -27,7 +27,8 @@ def train(
                                   batchsize = batchsize,
                                   lr = 0.001,
                                   vvgpu = gpus,
-                                  repeat_dataset = True,
+                                  #repeat_dataset = False,
+                                  repeat_dataset = False,
                                   i64_input_key = True)
 
     reader = hugectr.DataReaderParams(data_reader_type = hugectr.DataReaderType_t.Parquet,
@@ -90,7 +91,8 @@ def train(
  
     model.compile()
     model.summary()
-    model.fit(max_iter = max_iter, 
+    model.fit(#max_iter = max_iter, i
+              num_epochs=num_epochs,
               display = display_interval, 
               eval_interval = eval_interval, 
               snapshot = snapshot, 
@@ -118,6 +120,11 @@ def parse_args():
                         required=False,
                         default=20000,
                         help='Number of training iterations')
+    parser.add_argument('--num_epochs',
+                        type=int,
+                        required=False,
+                        default=1,
+                        help='Number of training epochs')
     parser.add_argument('-b',
                         '--batchsize',
                         type=int,
@@ -178,6 +185,7 @@ if __name__ == '__main__':
         valid_data=args.valid_data, 
         slot_size_array=args.slot_size_array,
         max_iter=args.max_iter,
+        num_epochs=args.num_epochs,
         snapshot=args.snapshot,
         eval_interval=args.eval_interval,
         display_interval=args.display_interval,

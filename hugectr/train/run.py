@@ -50,6 +50,7 @@ def run(args):
                     '--valid_data=' + args.valid_data,
                     '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
+                    '--num_of_epochs=' + str(args.num_of_epochs),
                     '--eval_interval=' + str(args.eval_interval),
                     '--snapshot=' + str(args.snapshot),
                     '--display_interval=' + str(args.display_interval),
@@ -118,6 +119,10 @@ if __name__ == '__main__':
                         type=int,
                         default=100000,
                         help='Num of training iterations')
+    parser.add_argument('--num_of_epochs',
+                        type=int,
+                        default=1,
+                        help='Num of training epochs')
     parser.add_argument('--batchsize',
                         type=int,
                         default=2048,
@@ -126,12 +131,12 @@ if __name__ == '__main__':
                         '--snapshot',
                         type=int,
                         required=False,
-                        default=1000000,
+                        default=0,
                         help='Saves a model snapshot after given number of iterations')
     parser.add_argument('--slot_size_array',
                         type=str,
                         required=False,
-                        default='3673278,28922,15432,7229,19673,4,6605,1315,63,2733920,376536,191906,11,2209,9663,74,4,957,15,3752950,1427075,3390584,231060,10906,92,35',
+                        default='16961592,34319,16768,7378,20132,4,6955,1384,63,11492137,914596,289081,11,2209,10737,79,4,971,15,17618173,5049264,15182940,364088,12075,102,35',
                         help='Categorical variables cardinalities')
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,
