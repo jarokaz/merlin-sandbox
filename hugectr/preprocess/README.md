@@ -20,3 +20,10 @@ python /src/preprocess_nvt.py \
 
 
 ```
+
+
+## Cardinalities
+
+```
+
+```

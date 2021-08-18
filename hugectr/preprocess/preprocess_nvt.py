@@ -208,9 +208,9 @@ def preprocess(args):
 
     logging.info("\nDask-NVTabular Criteo Preprocessing")
     logging.info("--------------------------------------")
-    logging.info(f"train_dir          | {args.train_dir}")
-    logging.info(f"valid_dir          | {args.valid_dir}")
-    logging.info(f"output_dir         | {args.output_dir}")
+    logging.info(f"train_dir          | {args.train_folder}")
+    logging.info(f"valid_dir          | {args.valid_folder}")
+    logging.info(f"output_dir         | {args.output_folder}")
     logging.info(f"partition size     | {'%.2f GB'%bytesto(int(args.part_mem_frac * device_size),'g')}")
     logging.info(f"protocol           | {args.protocol}")
     logging.info(f"device(s)          | {args.devices}")
