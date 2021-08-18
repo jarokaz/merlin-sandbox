@@ -58,7 +58,7 @@ python train.py \
 --train_data=/criteo_data/criteo_processed/train/_file_list.txt \
 --valid_data=/criteo_data/criteo_processed/valid/_file_list.txt \
 --workspace_size_per_gpu=4000 \
---display_interval=100 \
+--display_interval=1000 \
 --gpus=0,1
 ```
 
