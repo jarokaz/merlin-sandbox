@@ -8,11 +8,11 @@ python /src/preprocess_nvt.py \
 --valid_folder /criteo_data/valid_parquet \
 --output_folder /criteo_data/criteo_processed \
 --devices 0,1 \
---protocol ucx \
+--protocol tcp \
 --device_limit_frac 0.8 \
 --device_pool_frac 0.9 \
 --num_io_threads 4 \
---part_mem_frac 0.125 \
+--part_mem_frac 0.1 \
 --out_files_per_proc 8 \
 --freq_limit 6 \
 --shuffle PER_PARTITION
