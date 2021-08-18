@@ -197,7 +197,7 @@ def preprocess(args):
     end_time = time.time()
     elapsed_times['Total processing time'] = end_time - processing_start_time    
 
-    logging.info("\nDask-NVTabular Criteo Preprocessing")
+    logging.info("Dask-NVTabular Criteo Preprocessing")
     logging.info("--------------------------------------")
     logging.info(f"train_dir          | {args.train_folder}")
     logging.info(f"valid_dir          | {args.valid_folder}")
