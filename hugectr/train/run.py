@@ -109,11 +109,11 @@ if __name__ == '__main__':
 
     parser.add_argument('--train_data',
                         type=str,
-                        default='/gcs/jk-vertex-us-central1/criteo_data/train/_file_list.txt',
+                        default='/gcs/jk-vertex-us-central1/criteo_processed/train/_file_list.txt',
                         help='Training data location')
     parser.add_argument('--valid_data',
                         type=str,
-                        default='/gcs/jk-vertex-us-central1/criteo_data/valid/_file_list.txt',
+                        default='/gcs/jk-vertex-us-central1/criteo_processed/valid/_file_list.txt',
                         help='Validation data location')
     parser.add_argument('--max_iter',
                         type=int,
