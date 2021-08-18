@@ -12,7 +12,7 @@ python /src/preprocess_nvt.py \
 --device_limit_frac 0.8 \
 --device_pool_frac 0.9 \
 --num_io_threads 4 \
---part_mem_frac 0.1 \
+--part_mem_frac 0.08 \
 --out_files_per_proc 8 \
 --freq_limit 6 \
 --shuffle PER_PARTITION
@@ -23,6 +23,8 @@ python /src/preprocess_nvt.py \
 
 
 ## Cardinalities
+
+Based on training dataset day_0 - day_19
 
 ```
 

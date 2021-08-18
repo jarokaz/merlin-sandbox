@@ -128,6 +128,7 @@ def preprocess(args):
 
     client = None
     if len(gpus) > 1:
+        logging.info("Checking if any device memory is already occupied..")
         client = create_dask_cluster(
             protocol = args.protocol, 
             gpus=gpus,
@@ -140,6 +141,8 @@ def preprocess(args):
 
     elapsed_times = {} 
     processing_start_time = time.time()
+
+    logging.info("Creating datasets...")
     train_dataset = nvt.Dataset(train_paths, engine='parquet', part_size=part_size)
     valid_dataset = nvt.Dataset(valid_paths, engine='parquet', part_size=part_size)
 
@@ -166,11 +169,13 @@ def preprocess(args):
     elif args.shuffle == "PER_PARTITION":
         shuffle = nvt.io.Shuffle.PER_PARTITION
 
-    for dataset, name in zip([train_dataset, valid_dataset], ['Training dataset processing', 'Validation dataset processing']):
+    for dataset, output_folder, name in zip([train_dataset, valid_dataset], 
+                                            [train_output_folder, valid_output_folder],
+                                            ['Training dataset processing', 'Validation dataset processing']):
         logging.info(f'{name} .....')
         start_time = time.time()
         workflow.transform(train_dataset).to_parquet(
-            output_path=train_output_folder,
+            output_path=output_folder,
             dtypes=dict_dtypes,
             cats=CATEGORICAL_COLUMNS,
             conts=CONTINUOUS_COLUMNS,
