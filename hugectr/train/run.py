@@ -50,7 +50,7 @@ def run(args):
                     '--valid_data=' + args.valid_data,
                     '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
-                    '--num_of_epochs=' + str(args.num_of_epochs),
+                    '--num_epochs=' + str(args.num_epochs),
                     '--eval_interval=' + str(args.eval_interval),
                     '--snapshot=' + str(args.snapshot),
                     '--display_interval=' + str(args.display_interval),
@@ -119,7 +119,7 @@ if __name__ == '__main__':
                         type=int,
                         default=100000,
                         help='Num of training iterations')
-    parser.add_argument('--num_of_epochs',
+    parser.add_argument('--num_epochs',
                         type=int,
                         default=1,
                         help='Num of training epochs')
