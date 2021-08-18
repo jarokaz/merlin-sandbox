@@ -17,6 +17,7 @@ def train(
     max_iter,
     snapshot,
     eval_interval,
+    display_interval,
     batchsize,
     workspace_size_per_gpu,
     gpus):
@@ -90,7 +91,7 @@ def train(
     model.compile()
     model.summary()
     model.fit(max_iter = max_iter, 
-              display = 10, 
+              display = display_interval, 
               eval_interval = eval_interval, 
               snapshot = snapshot, 
               snapshot_prefix = "deepfm")
@@ -105,55 +106,52 @@ def parse_args():
                         required=False,
                         default='/data/output/test_dask/output/train/_file_list.txt',
                         help='Path to training data _file_list.txt')
-
     parser.add_argument('-v',
                         '--valid_data',
                         type=str,
                         required=False,
                         default='/data/output/test_dask/output/valid/_file_list.txt',
                         help='Path to validation data _file_list.txt')
-
     parser.add_argument('-i',
                         '--max_iter',
                         type=int,
                         required=False,
                         default=20000,
                         help='Number of training iterations')
-
     parser.add_argument('-b',
                         '--batchsize',
                         type=int,
                         required=False,
                         default=2048,
                         help='Batch size')
-
     parser.add_argument('-s',
                         '--snapshot',
                         type=int,
                         required=False,
                         default=10000,
                         help='Saves a model snapshot after given number of iterations')
-
     parser.add_argument('-g',
                         '--gpus',
                         type=str,
                         required=False,
                         default="0,1",
                         help='GPU devices to use for Preprocessing')
-
     parser.add_argument('-r',
                         '--eval_interval',
                         type=int,
                         required=False,
                         default=1000,
                         help='Run evaluation after given number of iterations')
-
+    parser.add_argument('--display_interval',
+                        type=int,
+                        required=False,
+                        default=100,
+                        help='Display progress after given number of iterations')
     parser.add_argument('--slot_size_array',
                         type=str,
                         required=False,
                         default='3673278,28922,15432,7229,19673,4,6605,1315,63,2733920,376536,191906,11,2209,9663,74,4,957,15,3752950,1427075,3390584,231060,10906,92,35',
                         help='Categorical variables cardinalities')
-
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,
                         required=False,
@@ -182,6 +180,7 @@ if __name__ == '__main__':
         max_iter=args.max_iter,
         snapshot=args.snapshot,
         eval_interval=args.eval_interval,
+        display_interval=args.display_interval,
         batchsize=args.batchsize,
         workspace_size_per_gpu=args.workspace_size_per_gpu,
         gpus=[args.gpus])

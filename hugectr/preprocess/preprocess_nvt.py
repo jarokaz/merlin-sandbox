@@ -1,14 +1,15 @@
 import os
+from re import I
 import sys
 import argparse
 import glob
 import time
-from cudf.io.parquet import ParquetWriter
-import numpy as np
-import pandas as pd
-import concurrent.futures as cf
-from concurrent.futures import as_completed
 import shutil
+import numpy as np
+import warnings
+
+import cudf
+from cudf.io.parquet import ParquetWriter
 
 import dask_cudf
 from dask_cuda import LocalCUDACluster
@@ -16,29 +17,21 @@ from dask.distributed import Client
 from dask.utils import parse_bytes
 from dask.delayed import delayed
 
-import cudf
 import rmm
 import nvtabular as nvt
 from nvtabular.io import Shuffle
-from nvtabular.utils import device_mem_size
+from nvtabular.utils import _pynvml_mem_size, device_mem_size
 from nvtabular.ops import Categorify, Clip, FillMissing, HashBucket, LambdaOp, Normalize, Rename, Operator, get_embedding_sizes
 #%load_ext memory_profiler
 
 import logging
-logging.basicConfig(format='%(asctime)s %(message)s')
-logging.root.setLevel(logging.NOTSET)
-logging.getLogger('numba').setLevel(logging.WARNING)
-logging.getLogger('asyncio').setLevel(logging.WARNING)
+
 
 # define dataset schema
 CATEGORICAL_COLUMNS=["C" + str(x) for x in range(1, 27)]
 CONTINUOUS_COLUMNS=["I" + str(x) for x in range(1, 14)]
 LABEL_COLUMNS = ['label']
 COLUMNS =  LABEL_COLUMNS + CONTINUOUS_COLUMNS +  CATEGORICAL_COLUMNS
-#/samples/criteo mode doesn't have dense features
-criteo_COLUMN=LABEL_COLUMNS +  CATEGORICAL_COLUMNS
-#For new feature cross columns
-CROSS_COLUMNS = []
 
 
 NUM_INTEGER_COLUMNS = 13
@@ -46,154 +39,135 @@ NUM_CATEGORICAL_COLUMNS = 26
 NUM_TOTAL_COLUMNS = 1 + NUM_INTEGER_COLUMNS + NUM_CATEGORICAL_COLUMNS
 
 
-# Initialize RMM pool on ALL workers
-def setup_rmm_pool(client, pool_size):
-    client.run(rmm.reinitialize, 
-               pool_allocator=True, 
-               initial_pool_size=(pool_size//256)*256)
-    return None
 
-#compute the partition size with GB
+
+
 def bytesto(bytes, to, bsize=1024):
+    """Computes a partition size in GBs."""
     a = {'k' : 1, 'm': 2, 'g' : 3, 't' : 4, 'p' : 5, 'e' : 6 }
     r = float(bytes)
     return bytes / (bsize ** a[to])
 
-class FeatureCross(Operator):
-    def __init__(self, dependency):
-        self.dependency = dependency
 
-    def transform(self, columns, gdf):
-        new_df = type(gdf)()
-        for col in columns:
-            new_df[col] = gdf[col] + gdf[self.dependency]
-        return new_df
+def create_preprocessing_workflow(
+    categorical_columns,
+    continuous_columns,
+    label_columns,
+    freq_limit, 
+    stats_path):
+    """Defines a preprocessing graph."""
 
-    def dependencies(self):
-        return [self.dependency]
+    categorify_op = Categorify(freq_threshold=freq_limit, out_path=stats_path)
+    cat_features = categorical_columns >> categorify_op
+    cont_features = continuous_columns >> FillMissing() >> Clip(min_value=0) >> Normalize()
+    features = cat_features + cont_features + label_columns
 
-#process the data with NVTabular
-def process_NVT(args):
+    dict_dtypes={}
+    for col in categorical_columns:
+        dict_dtypes[col] = np.int64
+    for col in continuous_columns:
+        dict_dtypes[col] = np.float32
+    for col in label_columns:
+        dict_dtypes[col] = np.float32
 
-    if args.feature_cross_list:
-        feature_pairs = [pair.split("_") for pair in args.feature_cross_list.split(",")]
-        for pair in feature_pairs:
-            CROSS_COLUMNS.append(pair[0]+'_'+pair[1])
+    return features, dict_dtypes
 
 
-    logging.info('NVTabular processing')
-    #train_input = os.path.join(args.data_path, "train/train.txt")
-    #val_input = os.path.join(args.data_path, "val/test.txt")
-    #PREPROCESS_DIR_temp_train = os.path.join(args.out_path, 'train/temp-parquet-after-conversion')
-    #PREPROCESS_DIR_temp_val = os.path.join(args.out_path, 'val/temp-parquet-after-conversion')
-    #PREPROCESS_DIR_temp = [PREPROCESS_DIR_temp_train, PREPROCESS_DIR_temp_val]
-    train_output = os.path.join(args.output_dir, "train")
-    val_output = os.path.join(args.output_dir, "valid")
+def create_dask_cluster(
+    protocol,
+    gpus,
+    device_memory_limit,
+    device_pool_size,
+):
+    """Deploys DASK cluster."""
+
+    def _rmm_pool():
+        rmm.reinitialize(
+            # RMM may require the pool size to be a multiple of 256.
+            pool_allocator=True,
+            initial_pool_size=(device_pool_size // 256) * 256,
+        ) 
+
+    if protocol == "ucx":
+        UCX_TLS = os.environ.get("UCX_TLS", "tcp,cuda_copy,cuda_ipc,sockcm")
+        os.environ["UCX_TLS"] = UCX_TLS
+        cluster = LocalCUDACluster(
+            protocol = protocol,
+            CUDA_VISIBLE_DEVICES = ','.join(gpus),
+            n_workers = len(gpus),
+            enable_nvlink=True,
+            device_memory_limit = device_memory_limit,
+            )
+    else:
+        cluster = LocalCUDACluster(
+            protocol = protocol,
+            n_workers = len(gpus),
+            CUDA_VISIBLE_DEVICES = ','.join(gpus),
+            device_memory_limit = device_memory_limit,
+            )
+        client = Client(cluster)
+
+    if device_pool_size > 256:
+        client.run(_rmm_pool)
+
+    return client
+
+def preprocess(args):
+    "Preprocesses training and validation splits."
+
+    train_output_folder = os.path.join(args.output_folder, 'train') 
+    valid_output_folder = os.path.join(args.output_folder, 'valid') 
+    stats_output_folder = os.path.join(args.output_folder, 'stats')
+    workflow_output_folder = os.path.join(args.output_folder, 'workflow')
 
     # Make sure we have a clean parquet space for cudf conversion
-    for one_path in [train_output, val_output]:
+    for one_path in [train_output_folder, valid_output_folder, stats_output_folder]:
         if os.path.exists(one_path):
             shutil.rmtree(one_path)
         os.makedirs(one_path)
 
-
-    ## Get Dask Client
-
-    # Deploy a Single-Machine Multi-GPU Cluster
+    logging.info("Checking if any device memory is already occupied..")
+    gpus = args.devices.split(',')
     device_size = device_mem_size(kind="total")
-    cluster = None
-    if args.protocol == "ucx":
-        UCX_TLS = os.environ.get("UCX_TLS", "tcp,cuda_copy,cuda_ipc,sockcm")
-        os.environ["UCX_TLS"] = UCX_TLS
-        cluster = LocalCUDACluster(
-            protocol = args.protocol,
-            CUDA_VISIBLE_DEVICES = args.devices,
-            n_workers = len(args.devices.split(",")),
-            enable_nvlink=True,
-            device_memory_limit = int(device_size * args.device_limit_frac),
-            dashboard_address=":" + args.dashboard_port
-        )
-    else:
-        cluster = LocalCUDACluster(
-            protocol = args.protocol,
-            n_workers = len(args.devices.split(",")),
-            CUDA_VISIBLE_DEVICES = args.devices,
-            device_memory_limit = int(device_size * args.device_limit_frac),
-            dashboard_address=":" + args.dashboard_port
-        )
+    for dev in gpus:
+        fmem = _pynvml_mem_size(kind="free", index=int(dev))
+        used = (device_size - fmem) / 1e9
+        if used > 1.0:
+            warnings.warn(f"BEWARE - {used} GB is already occupied on device {int(dev)}!")
 
+    client = None
+    if len(gpus) > 1:
+        client = create_dask_cluster(
+            protocol = args.protocol, 
+            gpus=gpus,
+            device_memory_limit= int(args.device_limit_frac * device_size),
+            device_pool_size=int(args.device_pool_frac * device_size)) 
 
+    train_paths = glob.glob(os.path.join(args.train_folder, "*.parquet"))
+    valid_paths = glob.glob(os.path.join(args.valid_folder, "*.parquet"))
+    part_size = int(args.part_mem_frac * device_size)
 
-    # Create the distributed client
-    client = Client(cluster)
-    if args.device_pool_frac > 0.01:
-        setup_rmm_pool(client, int(args.device_pool_frac*device_size))
+    elapsed_times = {} 
+    processing_start_time = time.time()
+    train_dataset = nvt.Dataset(train_paths, engine='parquet', part_size=part_size)
+    valid_dataset = nvt.Dataset(valid_paths, engine='parquet', part_size=part_size)
 
-
-    #calculate the total processing time
-    runtime = time.time()
-
-    #test dataset without the label feature
-    if args.dataset_type == 'test':
-        global LABEL_COLUMNS
-        LABEL_COLUMNS = []
-
-    ##-----------------------------------##
-    # Dask rapids converts txt to parquet
-    # Dask cudf dataframe = ddf
-
-    ## train/valid txt to parquet
-    #train_valid_paths = [(train_input,PREPROCESS_DIR_temp_train),(val_input,PREPROCESS_DIR_temp_val)]
-
-    #for input, temp_output in train_valid_paths:
-
-    #    ddf = dask_cudf.read_csv(input,sep='\t',names=LABEL_COLUMNS + CONTINUOUS_COLUMNS + CATEGORICAL_COLUMNS)
-
-    #    ## Convert label col to FP32
-    #    if args.parquet_format and args.dataset_type == 'train':
-    #        ddf["label"] = ddf['label'].astype('float32')
-
-    #    # Save it as parquet format for better memory usage
-    #    ddf.to_parquet(temp_output,header=True)
-    #    ##-----------------------------------##
-    
-    #train_paths = glob.glob(os.path.join(PREPROCESS_DIR_temp_train, "*.parquet"))
-    #valid_paths = glob.glob(os.path.join(PREPROCESS_DIR_temp_val, "*.parquet"))
-
-    train_paths = glob.glob(os.path.join(args.train_dir, "*.parquet"))
-    valid_paths = glob.glob(os.path.join(args.valid_dir, "*.parquet"))
-
-    COLUMNS =  LABEL_COLUMNS + CONTINUOUS_COLUMNS + CROSS_COLUMNS + CATEGORICAL_COLUMNS
-
-    categorify_op = Categorify(freq_threshold=args.freq_limit)
-    cat_features = CATEGORICAL_COLUMNS >> categorify_op
-    cont_features = CONTINUOUS_COLUMNS >> FillMissing() >> Clip(min_value=0) >> Normalize()
-    cross_cat_op = Categorify(freq_threshold=args.freq_limit)
-
-    features = LABEL_COLUMNS
-    
-    if args.criteo_mode == 0:
-        features += cont_features
-        if args.feature_cross_list:
-            feature_pairs = [pair.split("_") for pair in args.feature_cross_list.split(",")]
-            for pair in feature_pairs:
-                col0 = pair[0]
-                col1 = pair[1]
-                features += col0 >> FeatureCross(col1)  >> Rename(postfix="_"+col1) >> cross_cat_op
-            
-    features += cat_features
+    features, dict_dtypes = create_preprocessing_workflow(
+        categorical_columns=CATEGORICAL_COLUMNS,
+        continuous_columns=CONTINUOUS_COLUMNS,
+        label_columns=LABEL_COLUMNS,
+        freq_limit=args.freq_limit, 
+        stats_path=stats_output_folder)
 
     workflow = nvt.Workflow(features, client=client)
 
-    logging.info("Preprocessing")
-
-    output_format = 'hugectr'
-    if args.parquet_format:
-        output_format = 'parquet'
-
-    # just for /samples/criteo model
-    train_ds_iterator = nvt.Dataset(train_paths, engine='parquet', part_size=int(args.part_mem_frac * device_size))
-    valid_ds_iterator = nvt.Dataset(valid_paths, engine='parquet', part_size=int(args.part_mem_frac * device_size))
+    logging.info('Fitting the workflow') 
+     
+    start_time = time.time()  
+    workflow.fit(train_dataset)
+    end_time = time.time()
+    elapsed_times['Workflow fitting'] = end_time - start_time
+    logging.info('Fitting completed.')
 
     shuffle = None
     if args.shuffle == "PER_WORKER":
@@ -201,126 +175,61 @@ def process_NVT(args):
     elif args.shuffle == "PER_PARTITION":
         shuffle = nvt.io.Shuffle.PER_PARTITION
 
-    logging.info('Train Datasets Preprocessing.....')
-
-    dict_dtypes = {}
-    for col in CATEGORICAL_COLUMNS:
-        dict_dtypes[col] = np.int64
-    if not args.criteo_mode:
-        for col in CONTINUOUS_COLUMNS:
-            dict_dtypes[col] = np.float32
-    for col in CROSS_COLUMNS:
-        dict_dtypes[col] = np.int64
-    for col in LABEL_COLUMNS:
-        dict_dtypes[col] = np.float32
-    
-    conts = CONTINUOUS_COLUMNS if not args.criteo_mode else []
-    
-    workflow.fit(train_ds_iterator)
-    
-    if output_format == 'hugectr':
-        workflow.transform(train_ds_iterator).to_hugectr(
-                cats=CATEGORICAL_COLUMNS + CROSS_COLUMNS,
-                conts=conts,
-                labels=LABEL_COLUMNS,
-                output_path=train_output,
-                shuffle=shuffle,
-                out_files_per_proc=args.out_files_per_proc,
-                num_threads=args.num_io_threads)
-    else:
-        workflow.transform(train_ds_iterator).to_parquet(
-                output_path=train_output,
-                dtypes=dict_dtypes,
-                cats=CATEGORICAL_COLUMNS + CROSS_COLUMNS,
-                conts=conts,
-                labels=LABEL_COLUMNS,
-                shuffle=shuffle,
-                out_files_per_proc=args.out_files_per_proc,
-                num_threads=args.num_io_threads)
-        
-        
-        
-    ###Getting slot size###    
-    #--------------------##
-    embeddings_dict_cat = categorify_op.get_embedding_sizes(CATEGORICAL_COLUMNS)
-    embeddings_dict_cross = cross_cat_op.get_embedding_sizes(CROSS_COLUMNS)
-    embeddings = [embeddings_dict_cross[c][0] for c in CROSS_COLUMNS] + [embeddings_dict_cat[c][0] for c in CATEGORICAL_COLUMNS]
-    
-    print(embeddings)
-    ##--------------------##
-
-    logging.info('Valid Datasets Preprocessing.....')
-
-    if output_format == 'hugectr':
-        workflow.transform(valid_ds_iterator).to_hugectr(
-                cats=CATEGORICAL_COLUMNS + CROSS_COLUMNS,
-                conts=conts,
-                labels=LABEL_COLUMNS,
-                output_path=val_output,
-                shuffle=shuffle,
-                out_files_per_proc=args.out_files_per_proc,
-                num_threads=args.num_io_threads)
-    else:
-        workflow.transform(valid_ds_iterator).to_parquet(
-                output_path=val_output,
-                dtypes=dict_dtypes,
-                cats=CATEGORICAL_COLUMNS + CROSS_COLUMNS,
-                conts=conts,
-                labels=LABEL_COLUMNS,
-                shuffle=shuffle,
-                out_files_per_proc=args.out_files_per_proc,
-                num_threads=args.num_io_threads)
-
-    embeddings_dict_cat = categorify_op.get_embedding_sizes(CATEGORICAL_COLUMNS)
-    embeddings_dict_cross = cross_cat_op.get_embedding_sizes(CROSS_COLUMNS)
-    embeddings = [embeddings_dict_cross[c][0] for c in CROSS_COLUMNS] + [embeddings_dict_cat[c][0] for c in CATEGORICAL_COLUMNS]
-    
-    print(embeddings)
-    ##--------------------##
+    for dataset, name in zip([train_dataset, valid_dataset], ['Training dataset processing', 'Validation dataset processing']):
+        logging.info(f'{name} .....')
+        start_time = time.time()
+        workflow.transform(train_dataset).to_parquet(
+            output_path=train_output_folder,
+            dtypes=dict_dtypes,
+            cats=CATEGORICAL_COLUMNS,
+            conts=CONTINUOUS_COLUMNS,
+            labels=LABEL_COLUMNS,
+            shuffle=shuffle,
+            out_files_per_proc=args.out_files_per_proc,
+            num_threads=args.num_io_threads)
+        end_time = time.time()
+        elapsed_times[name] = end_time - start_time
+        logging.info('Processing completed.')    
 
     cardinalities = []
     for col in CATEGORICAL_COLUMNS:
         cardinalities.append(nvt.ops.get_embedding_sizes(workflow)[col][0])
-
+    
     logging.info(f"Cardinalities for configuring slot_size_array: {cardinalities}")
+
+    logging.info(f"Saving workflow object at: {workflow_output_folder}")
+    workflow.save(workflow_output_folder)
 
     ## Shutdown clusters
     client.close()
-    logging.info('NVTabular processing done')
 
-    runtime = time.time() - runtime
+    end_time = time.time()
+    elapsed_times['Total processing time'] = end_time - processing_start_time    
 
-    print("\nDask-NVTabular Criteo Preprocessing")
-    print("--------------------------------------")
-    print(f"train_dir          | {args.train_dir}")
-    print(f"valid_dir          | {args.valid_dir}")
-    print(f"output_dir         | {args.output_dir}")
-    print(f"partition size     | {'%.2f GB'%bytesto(int(args.part_mem_frac * device_size),'g')}")
-    print(f"protocol           | {args.protocol}")
-    print(f"device(s)          | {args.devices}")
-    print(f"rmm-pool-frac      | {(args.device_pool_frac)}")
-    print(f"out-files-per-proc | {args.out_files_per_proc}")
-    print(f"num_io_threads     | {args.num_io_threads}")
-    print(f"shuffle            | {args.shuffle}")
-    print("======================================")
-    print(f"Runtime[s]         | {runtime}")
-    print("======================================\n")
+    logging.info("\nDask-NVTabular Criteo Preprocessing")
+    logging.info("--------------------------------------")
+    logging.info(f"train_dir          | {args.train_dir}")
+    logging.info(f"valid_dir          | {args.valid_dir}")
+    logging.info(f"output_dir         | {args.output_dir}")
+    logging.info(f"partition size     | {'%.2f GB'%bytesto(int(args.part_mem_frac * device_size),'g')}")
+    logging.info(f"protocol           | {args.protocol}")
+    logging.info(f"device(s)          | {args.devices}")
+    logging.info(f"rmm-pool-frac      | {(args.device_pool_frac)}")
+    logging.info(f"out-files-per-proc | {args.out_files_per_proc}")
+    logging.info(f"num_io_threads     | {args.num_io_threads}")
+    logging.info(f"shuffle            | {args.shuffle}")
+    logging.info("======================================")
+    for elapsed_time_name, elapsed_time in elapsed_times.items():
+        logging.info(f"{elapsed_time_name}         | {elapsed_time}")
+    logging.info("======================================\n")
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=("Multi-GPU Criteo Preprocessing"))
 
-    #
-    # System Options
-    #
-
-    #parser.add_argument("--data_path", type=str, help="Input dataset path (Required)")
-
-    parser.add_argument("--train_dir", type=str, help="Training data folder(Required)")
-    parser.add_argument("--valid_dir", type=str, help="Valid data folder (Required)")
-
-
-    parser.add_argument("--output_dir", type=str, help="Directory path to write output (Required)")
+    parser.add_argument("--train_folder", type=str, help="Training data folder(Required)")
+    parser.add_argument("--valid_folder", type=str, help="Valid data folder (Required)")
+    parser.add_argument("--output_folder", type=str, help="Directory path to write output (Required)")
     parser.add_argument(
         "-d",
         "--devices",
@@ -338,7 +247,7 @@ def parse_args():
     )
     parser.add_argument(
         "--device_limit_frac",
-        default=0.5,
+        default=0.7,
         type=float,
         help="Worker device-memory limit as a fraction of GPU capacity (Default 0.8). "
     )
@@ -394,43 +303,18 @@ def parse_args():
         help="Shuffle algorithm to use when writing output data to disk (Default PER_PARTITION)",
     )
 
-    parser.add_argument(
-        "--feature_cross_list", default=None, type=str, help="List of feature crossing cols (e.g. C1_C2, C3_C4)"
-    )
-
-    #
-    # Diagnostics Options
-    #
-
-    parser.add_argument(
-        "--profile",
-        metavar="PATH",
-        default=None,
-        type=str,
-        help="Specify a file path to export a Dask profile report (E.g. dask-report.html)."
-        "If this option is excluded from the command, not profile will be exported",
-    )
-    parser.add_argument(
-        "--dashboard_port",
-        default="8787",
-        type=str,
-        help="Specify the desired port of Dask's diagnostics-dashboard (Default `3787`). "
-        "The dashboard will be hosted at http://<IP>:<PORT>/status",
-    )
-
-    #
-    # Format
-    #
-
-    parser.add_argument('--criteo_mode', type=int, default=0)
-    parser.add_argument('--parquet_format', type=int, default=1)
-    parser.add_argument('--dataset_type', type=str, default='train')
 
     args = parser.parse_args()
     args.n_workers = len(args.devices.split(","))
     return args
+
 if __name__ == '__main__':
+
+    logging.basicConfig(format='%(asctime)s %(message)s')
+    logging.root.setLevel(logging.NOTSET)
+    logging.getLogger('numba').setLevel(logging.WARNING)
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     args = parse_args()
 
-    process_NVT(args)
+    preprocess(args)

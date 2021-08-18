@@ -51,6 +51,8 @@ def run(args):
                     '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
                     '--eval_interval=' + str(args.eval_interval),
+                    '--snapshot=' + str(args.snapshot),
+                    '--display_interval=' + str(args.display_interval),
                     '--workspace_size_per_gpu=' + str(args.workspace_size_per_gpu),
                     '--gpus=' + ','.join(map(str, range(args.accelerator_num))),
                 ],
@@ -114,12 +116,8 @@ if __name__ == '__main__':
                         help='Validation data location')
     parser.add_argument('--max_iter',
                         type=int,
-                        default=10000,
+                        default=100000,
                         help='Num of training iterations')
-    parser.add_argument('--eval_interval',
-                        type=int,
-                        default=1000,
-                        help='Run evaluation after given number of iterations')
     parser.add_argument('--batchsize',
                         type=int,
                         default=2048,
@@ -128,7 +126,7 @@ if __name__ == '__main__':
                         '--snapshot',
                         type=int,
                         required=False,
-                        default=10000,
+                        default=1000000,
                         help='Saves a model snapshot after given number of iterations')
     parser.add_argument('--slot_size_array',
                         type=str,
@@ -140,6 +138,16 @@ if __name__ == '__main__':
                         required=False,
                         default=1000,
                         help='Workspace size per gpu in MB')
+    parser.add_argument('--eval_interval',
+                        type=int,
+                        required=False,
+                        default=5000,
+                        help='Run evaluation after given number of iterations')
+    parser.add_argument('--display_interval',
+                        type=int,
+                        required=False,
+                        default=1000,
+                        help='Display progress after given number of iterations')
 
     args = parser.parse_args()
 
