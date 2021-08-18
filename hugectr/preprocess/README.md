@@ -2,7 +2,7 @@
 docker run -it --rm --gpus all \
 -v /home/jupyter/src/merlin-sandbox/hugectr/preprocess:/src \
 -v /mnt/disks/criteo:/criteo_data \
-nvcr.io/nvidia/merlin/merlin-training:0.6 \
+nvcr.io/nvidia/merlin/merlin-training:0.5.3 \
 python /src/preprocess_nvt.py \
 --train_folder /criteo_data/train_parquet \
 --valid_folder /criteo_data/valid_parquet \
