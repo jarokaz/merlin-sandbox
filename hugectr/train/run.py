@@ -121,7 +121,7 @@ if __name__ == '__main__':
                         help='Num of training iterations')
     parser.add_argument('--num_epochs',
                         type=int,
-                        default=1,
+                        default=2,
                         help='Num of training epochs')
     parser.add_argument('--batchsize',
                         type=int,
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,
                         required=False,
-                        default=4000,
+                        default=9000,
                         help='Workspace size per gpu in MB')
     parser.add_argument('--eval_interval',
                         type=int,

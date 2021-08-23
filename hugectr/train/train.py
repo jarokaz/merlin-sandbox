@@ -7,7 +7,6 @@ import hugectr
 
 from mpi4py import MPI
 
-SLOT_SIZE_ARRAY = [16961592, 34319, 16768, 7378, 20132, 4, 6955, 1384, 63, 11492137, 914596, 289081, 11, 2209, 10737, 79, 4, 971, 15, 17618173, 5049264, 15182940, 364088, 12075, 102, 35]
 
 def train(
     train_data,
@@ -157,7 +156,7 @@ def parse_args():
     parser.add_argument('--slot_size_array',
                         type=str,
                         required=False,
-                        default='3673278,28922,15432,7229,19673,4,6605,1315,63,2733920,376536,191906,11,2209,9663,74,4,957,15,3752950,1427075,3390584,231060,10906,92,35',
+                        default='16961592,34319,16768,7378,20132,4,6955,1384,63,11492137,914596,289081,11,2209,10737,79,4,971,15,17618173,5049264,15182940,364088,12075,102,35',
                         help='Categorical variables cardinalities')
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,

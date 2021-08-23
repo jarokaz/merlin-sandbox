@@ -53,11 +53,11 @@ python train.py \
 --num_epochs 1 \
 --max_iter 500000 \
 --eval_interval=5000 \
---batchsize=2048 \
+--batchsize=4096 \
 --snapshot=0 \
 --train_data=/criteo_data/criteo_processed/train/_file_list.txt \
 --valid_data=/criteo_data/criteo_processed/valid/_file_list.txt \
---workspace_size_per_gpu=4000 \
+--workspace_size_per_gpu=9000 \
 --display_interval=1000 \
 --gpus=0,1
 ```
