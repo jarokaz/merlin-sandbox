@@ -69,7 +69,9 @@ def run(args):
         display_name=job_name,
         worker_pool_specs=worker_pool_specs,
     )
-    job.run(sync=True)
+    job.run(sync=True,
+            restart_job_on_worker_restart=False
+    )
 
 if __name__ == '__main__':
 
