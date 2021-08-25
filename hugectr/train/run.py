@@ -48,7 +48,7 @@ def run(args):
                     '--batchsize=' + str(args.batchsize),
                     '--train_data=' + args.train_data, 
                     '--valid_data=' + args.valid_data,
-                    '--slot_size_array=' + args.slot_size_array,
+    #                '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
                     '--num_epochs=' + str(args.num_epochs),
                     '--eval_interval=' + str(args.eval_interval),
@@ -60,6 +60,33 @@ def run(args):
             },
         }
     ]
+
+   # worker_pool_specs =  [
+   #     {
+   #         "machine_spec": {
+   #             "machine_type": "a2-highgpu-1g",
+   #             "accelerator_type": "NVIDIA_TESLA_A100",
+   #             "accelerator_count": 1,
+   #         },
+   #         "replica_count": 1,
+   #         "container_spec": {
+   #             "image_uri": "gcr.io/jk-mlops-dev/merlin-train",
+   #             "command": ["python", "train.py"],
+   #             "args": [
+   #                 '--batchsize=2048',
+   #                 '--train_data=' + args.train_data, 
+   #                 '--valid_data=' + args.valid_data,
+   #                 '--max_iter=500000' ,
+   #                 '--num_epochs=1', 
+   #                 '--eval_interval=5000',
+   #                 '--snapshot=0',
+   #                 '--display_interval=1000',
+   #                 '--workspace_size_per_gpu=9000',
+   #                 '--gpus=0',
+   #             ],
+   #         },
+   #     }
+   # ]
 
     job_name = 'HUGECTR_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
 
@@ -94,7 +121,7 @@ if __name__ == '__main__':
                         help='Vertex SA')
     parser.add_argument('--machine_type',
                         type=str,
-                        default='a2-highgpu-2g',
+                        default='a2-highgpu-1g',
                         help='Machine type')
     parser.add_argument('--accelerator_type',
                         type=str,
@@ -102,7 +129,7 @@ if __name__ == '__main__':
                         help='Accelerator type')
     parser.add_argument('--accelerator_num',
                         type=int,
-                        default=2,
+                        default=1,
                         help='Num of GPUs')
     parser.add_argument('--train_image',
                         type=str,
@@ -119,7 +146,7 @@ if __name__ == '__main__':
                         help='Validation data location')
     parser.add_argument('--max_iter',
                         type=int,
-                        default=100000,
+                        default=500000,
                         help='Num of training iterations')
     parser.add_argument('--num_epochs',
                         type=int,
