@@ -48,7 +48,7 @@ def run(args):
                     '--batchsize=' + str(args.batchsize),
                     '--train_data=' + args.train_data, 
                     '--valid_data=' + args.valid_data,
-    #                '--slot_size_array=' + args.slot_size_array,
+         #           '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
                     '--num_epochs=' + str(args.num_epochs),
                     '--eval_interval=' + str(args.eval_interval),
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                         help='Vertex SA')
     parser.add_argument('--machine_type',
                         type=str,
-                        default='a2-highgpu-1g',
+                        default='a2-highgpu-2g',
                         help='Machine type')
     parser.add_argument('--accelerator_type',
                         type=str,
@@ -129,7 +129,7 @@ if __name__ == '__main__':
                         help='Accelerator type')
     parser.add_argument('--accelerator_num',
                         type=int,
-                        default=1,
+                        default=2,
                         help='Num of GPUs')
     parser.add_argument('--train_image',
                         type=str,
@@ -175,12 +175,12 @@ if __name__ == '__main__':
     parser.add_argument('--eval_interval',
                         type=int,
                         required=False,
-                        default=5000,
+                        default=50000,
                         help='Run evaluation after given number of iterations')
     parser.add_argument('--display_interval',
                         type=int,
                         required=False,
-                        default=1000,
+                        default=10000,
                         help='Display progress after given number of iterations')
 
     args = parser.parse_args()
