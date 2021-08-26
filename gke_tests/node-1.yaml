@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bandwidth-test
+  name: bandwidth-test
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bandwidth-test
+  template:
+    metadata:
+      labels:
+        app: bandwidth-test
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cloud.google.com/gke-nodepool
+                operator: In
+                values:
+                - gpu-pool-1
+      containers:
+      - command:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/deeplearning-platform-release/base-cu110
+        imagePullPolicy: Always
+        name: shell
