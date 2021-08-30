@@ -33,6 +33,8 @@ def run(args):
         staging_bucket=args.gcs_bucket
     )
 
+    batchsize = args.per_replica_batchsize * args.accelerator_num
+
     worker_pool_specs =  [
         {
             "machine_spec": {
@@ -45,10 +47,10 @@ def run(args):
                 "image_uri": args.train_image,
                 "command": ["python", "train.py"],
                 "args": [
-                    '--batchsize=' + str(args.batchsize),
+                    '--batchsize=' + str(batchsize),
                     '--train_data=' + args.train_data, 
                     '--valid_data=' + args.valid_data,
-         #           '--slot_size_array=' + args.slot_size_array,
+                    '--slot_size_array=' + args.slot_size_array,
                     '--max_iter=' + str(args.max_iter),
                     '--num_epochs=' + str(args.num_epochs),
                     '--eval_interval=' + str(args.eval_interval),
@@ -61,32 +63,6 @@ def run(args):
         }
     ]
 
-   # worker_pool_specs =  [
-   #     {
-   #         "machine_spec": {
-   #             "machine_type": "a2-highgpu-1g",
-   #             "accelerator_type": "NVIDIA_TESLA_A100",
-   #             "accelerator_count": 1,
-   #         },
-   #         "replica_count": 1,
-   #         "container_spec": {
-   #             "image_uri": "gcr.io/jk-mlops-dev/merlin-train",
-   #             "command": ["python", "train.py"],
-   #             "args": [
-   #                 '--batchsize=2048',
-   #                 '--train_data=' + args.train_data, 
-   #                 '--valid_data=' + args.valid_data,
-   #                 '--max_iter=500000' ,
-   #                 '--num_epochs=1', 
-   #                 '--eval_interval=5000',
-   #                 '--snapshot=0',
-   #                 '--display_interval=1000',
-   #                 '--workspace_size_per_gpu=9000',
-   #                 '--gpus=0',
-   #             ],
-   #         },
-   #     }
-   # ]
 
     job_name = 'HUGECTR_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
 
@@ -152,7 +128,7 @@ if __name__ == '__main__':
                         type=int,
                         default=2,
                         help='Num of training epochs')
-    parser.add_argument('--batchsize',
+    parser.add_argument('--per_replica_batchsize',
                         type=int,
                         default=2048,
                         help='Batch size')
