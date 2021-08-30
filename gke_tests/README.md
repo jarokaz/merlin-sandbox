@@ -67,11 +67,23 @@ kubectl run my-shell --rm -i --tty --image ubuntu -- bash
 ```
 
 
-pod 1 IP : 10.80.1.3
+pod 1 IP : 10.80.1.6
 
-pod 2 IP : 10.80.2.3
+pod 2 IP : 10.80.2.4
 
 ```
 kubectl exec --stdin --tty gpu-pod-1 -- /bin/bash
 kubectl exec --stdin --tty gpu-pod-2 -- /bin/bash
+```
+
+```
+gcloud container clusters create jk-gpu-cluster-1 \
+    --zone "us-west1-a" \
+    --accelerator type=nvidia-tesla-t4,count=4 \
+    --machine-type=n1-standard-96 \
+    --enable-gvnic
+```
+
+```
+gsutil perfdiag -t rthru -s 2048M -n 2*N -c N gs://jk-perfdiag				
 ```
