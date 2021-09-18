@@ -111,7 +111,7 @@ gcloud beta filestore instances create nfs-server \
 ```
 docker run -it --rm --gpus all --cap-add SYS_NICE \
 -v /home/jupyter/merlin-sandbox/hugectr/train:/src \
--v /home/jupyter/criteo_unprocessed:/criteo_data \
+-v /home/jupyter/criteo_processed:/criteo_data \
 nvcr.io/nvidia/merlin/merlin-training:0.6 \
 python /src/train.py \
 --num_epochs 1 \
@@ -122,6 +122,6 @@ python /src/train.py \
 --train_data=/criteo_data/output/train/_file_list.txt  \
 --valid_data=/criteo_data/output/valid/_file_list.txt  \
 --display_interval=1000 \
---workspace_size_per_gpu=2000 \
---gpus=0,1,2,3
+--workspace_size_per_gpu=9000 \
+--gpus=0,1
 ```
