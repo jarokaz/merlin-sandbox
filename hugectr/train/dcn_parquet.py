@@ -1,8 +1,5 @@
-def create_model():
-
 import hugectr
 from mpi4py import MPI
-
 solver = hugectr.CreateSolver(max_eval_batches = 300,
                               batchsize_eval = 16384,
                               batchsize = 16384,
@@ -11,9 +8,10 @@ solver = hugectr.CreateSolver(max_eval_batches = 300,
                               repeat_dataset = True,
                               i64_input_key = True)
 reader = hugectr.DataReaderParams(data_reader_type = hugectr.DataReaderType_t.Parquet,
-                                  source = ["./criteo_data/train/_file_list.txt"],
-                                  eval_source = "./criteo_data/val/_file_list.txt",
-                                  slot_size_array = [203931, 18598, 14092, 7012, 18977, 4, 6385, 1245, 49, 186213, 71328, 67288, 11, 2168, 7338, 61, 4, 932, 15, 204515, 141526, 199433, 60919, 9137, 71, 34],
+                                  source = ["/criteo_data/output/train/_file_list.txt"],
+                                  eval_source = "/criteo_data/output/valid/_file_list.txt",
+                                  #slot_size_array = [203931, 18598, 14092, 7012, 18977, 4, 6385, 1245, 49, 186213, 71328, 67288, 11, 2168, 7338, 61, 4, 932, 15, 204515, 141526, 199433, 60919, 9137, 71, 34],
+                                  slot_size_array = [2839307, 28141, 15313, 7229, 19673, 4, 6558, 1297, 63, 2156343, 327548, 178478, 11, 2208, 9517, 73, 4, 957, 15, 2893928, 1166099, 2636476, 211349, 10776, 92, 35],
                                   check_type = hugectr.Check_t.Non)
 optimizer = hugectr.CreateOptimizer(optimizer_type = hugectr.Optimizer_t.Adam,
                                     update_type = hugectr.Update_t.Global,
@@ -78,3 +76,7 @@ model.add(hugectr.DenseLayer(layer_type = hugectr.Layer_t.InnerProduct,
 model.add(hugectr.DenseLayer(layer_type = hugectr.Layer_t.BinaryCrossEntropyLoss,
                             bottom_names = ["fc3", "label"],
                             top_names = ["loss"]))
+model.compile()
+model.summary()
+model.fit(max_iter = 2300, display = 200, eval_interval = 1000, snapshot = 1000000, snapshot_prefix = "dcn")
+
