@@ -105,13 +105,13 @@ def parse_args():
                         '--train_data',
                         type=str,
                         required=False,
-                        default='/data/output/test_dask/output/train/_file_list.txt',
+                        default='/criteo_data/output/train/_file_list.txt',
                         help='Path to training data _file_list.txt')
     parser.add_argument('-v',
                         '--valid_data',
                         type=str,
                         required=False,
-                        default='/data/output/test_dask/output/valid/_file_list.txt',
+                        default='/criteo_data//output/valid/_file_list.txt',
                         help='Path to validation data _file_list.txt')
     parser.add_argument('-i',
                         '--max_iter',
@@ -128,7 +128,7 @@ def parse_args():
                         '--batchsize',
                         type=int,
                         required=False,
-                        default=2048,
+                        default=8192,
                         help='Batch size')
     parser.add_argument('-s',
                         '--snapshot',
@@ -140,7 +140,7 @@ def parse_args():
                         '--gpus',
                         type=str,
                         required=False,
-                        default="0,1",
+                        default="0,1,3,4",
                         help='GPU devices to use for Preprocessing')
     parser.add_argument('-r',
                         '--eval_interval',
@@ -156,7 +156,7 @@ def parse_args():
     parser.add_argument('--slot_size_array',
                         type=str,
                         required=False,
-                        default='16961592,34319,16768,7378,20132,4,6955,1384,63,11492137,914596,289081,11,2209,10737,79,4,971,15,17618173,5049264,15182940,364088,12075,102,35',
+                        default='2839307,28141,15313,7229,19673,4,6558,1297,63,2156343,327548,178478,11,2208,9517,73,4,957,15,2893928,1166099,2636476,211349,10776,92,35',
                         help='Categorical variables cardinalities')
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,

@@ -119,6 +119,7 @@ def preprocess(args):
 
     logging.info("Checking if any device memory is already occupied..")
     gpus = args.devices.split(',')
+    
     device_size = device_mem_size(kind="total")
     for dev in gpus:
         fmem = _pynvml_mem_size(kind="free", index=int(dev))

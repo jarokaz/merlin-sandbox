@@ -1,13 +1,13 @@
 ```
 docker run -it --rm --gpus all \
--v /home/jupyter/src/merlin-sandbox/hugectr/preprocess:/src \
--v /mnt/disks/criteo:/criteo_data \
+-v /home/jupyter/merlin-sandbox/hugectr/preprocess:/src \
+-v /home/jupyter/criteo_unprocessed:/criteo_data \
 nvcr.io/nvidia/merlin/merlin-training:0.5.3 \
 python /src/preprocess_nvt.py \
---train_folder /criteo_data/train_parquet \
---valid_folder /criteo_data/valid_parquet \
---output_folder /criteo_data/criteo_processed \
---devices 0,1 \
+--train_folder /criteo_data/train \
+--valid_folder /criteo_data/valid \
+--output_folder /criteo_data/output \
+--devices 0,1,2,3 \
 --protocol tcp \
 --device_limit_frac 0.8 \
 --device_pool_frac 0.9 \
@@ -28,5 +28,11 @@ Based on training dataset day_0 - day_19
 
 ```
 [16961592, 34319, 16768, 7378, 20132, 4, 6955, 1384, 63, 11492137, 914596, 289081, 11, 2209, 10737, 79, 4, 971, 15, 17618173, 5049264, 15182940, 364088, 12075, 102, 35]
+
+```
+
+Based on training dataset day_0 - day_2
+
+```
 
 ```
