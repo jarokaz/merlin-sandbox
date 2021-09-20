@@ -152,3 +152,21 @@ python -m trainer.task \
 --slot_size_array="[2839307, 28141, 15313, 7229, 19673, 4, 6558, 1297, 63, 2156343, 327548, 178478, 11, 2208, 9517, 73, 4, 957, 15, 2893928, 1166099, 2636476, 211349, 10776, 92, 35]" \
 --gpus="[[0,1]]"
 ```
+
+```
+docker run -it --rm --gpus all --cap-add SYS_NICE --network host \
+-v /home/jupyter/criteo_processed:/criteo_data \
+gcr.io/jk-mlops-dev/merlin-train \
+python -m trainer.task \
+--num_epochs 1 \
+--max_iter 50000 \
+--eval_interval=600 \
+--batchsize=16384 \
+--snapshot=0 \
+--train_data=/criteo_data/output/train/_file_list.txt  \
+--valid_data=/criteo_data/output/valid/_file_list.txt  \
+--display_interval=200 \
+--workspace_size_per_gpu=1 \
+--slot_size_array="[2839307, 28141, 15313, 7229, 19673, 4, 6558, 1297, 63, 2156343, 327548, 178478, 11, 2208, 9517, 73, 4, 957, 15, 2893928, 1166099, 2636476, 211349, 10776, 92, 35]" \
+--gpus="[[0,1]]"
+```
