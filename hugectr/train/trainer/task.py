@@ -69,7 +69,7 @@ def parse_args():
                         '--snapshot',
                         type=int,
                         required=False,
-                        default=10000,
+                        default=0,
                         help='Saves a model snapshot after given number of iterations')
     parser.add_argument('--gpus',
                         type=str,
@@ -85,11 +85,12 @@ def parse_args():
     parser.add_argument('--display_interval',
                         type=int,
                         required=False,
-                        default=100,
+                        default=200,
                         help='Display progress after given number of iterations')
     parser.add_argument('--slot_size_array',
                         type=str,
                         required=True,
+                        default="[2839307, 28141, 15313, 7229, 19673, 4, 6558, 1297, 63, 2156343, 327548, 178478, 11, 2208, 9517, 73, 4, 957, 15, 2893928, 1166099, 2636476, 211349, 10776, 92, 35]", 
                         help='Categorical variables cardinalities')
     parser.add_argument('--workspace_size_per_gpu',
                         type=int,
