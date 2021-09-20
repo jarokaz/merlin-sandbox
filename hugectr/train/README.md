@@ -4,6 +4,7 @@
 ```
 docker build -t gcr.io/jk-mlops-dev/merlin-train .
 docker push gcr.io/jk-mlops-dev/merlin-train
+docker pull gcr.io/jk-mlops-dev/merlin-train 
 ```
 
 
