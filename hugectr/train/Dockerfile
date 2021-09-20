@@ -18,5 +18,6 @@ RUN mkdir -p /root/.ssh/ && \
 WORKDIR /src
 
 COPY trainer ./trainer
+COPY mpi-test.py .
 
 EXPOSE 2222
