@@ -89,7 +89,7 @@ def parse_args():
                         help='Display progress after given number of iterations')
     parser.add_argument('--slot_size_array',
                         type=str,
-                        required=True,
+                        required=False,
                         default="[2839307, 28141, 15313, 7229, 19673, 4, 6558, 1297, 63, 2156343, 327548, 178478, 11, 2208, 9517, 73, 4, 957, 15, 2893928, 1166099, 2636476, 211349, 10776, 92, 35]", 
                         help='Categorical variables cardinalities')
     parser.add_argument('--workspace_size_per_gpu',
