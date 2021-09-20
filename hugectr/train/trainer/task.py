@@ -52,12 +52,12 @@ def parse_args():
                         '--max_iter',
                         type=int,
                         required=False,
-                        default=0,
+                        default=1000,
                         help='Number of training iterations')
     parser.add_argument('--num_epochs',
                         type=int,
                         required=False,
-                        default=1,
+                        default=0,
                         help='Number of training epochs')
     parser.add_argument('-b',
                         '--batchsize',
