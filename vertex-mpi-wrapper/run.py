@@ -33,7 +33,7 @@ def run(args):
         staging_bucket=args.gcs_bucket
     )
 
-    job_name = 'NVT_BENCHMARK_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
+    job_name = 'MPI_TESTING_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
 
     if args.accelerator_num > 0: 
         machine_spec = {
@@ -52,17 +52,23 @@ def run(args):
             "replica_count": 1,
             "container_spec": {
                 "image_uri": args.train_image,
-                "command": ["python", TEST_FILE],
+                #"command": ["python", TEST_FILE],
                 "args": [
-                    '--data-path=' + args.data_path, 
-                    '--out-path=' + f'{args.out_path}/{job_name}',
-                    '--devices=' + args.devices,
-                    '--protocol=' + args.protocol, 
-                    '--device-limit-frac=' + str(args.device_limit_frac), 
-                    '--device-pool-frac=' + str(args.device_pool_frac), 
-                    '--part-mem-frac=' + str(args.part_mem_frac),
-                    '--num-io-threads=' + str(args.num_io_threads),
+                    'python',
+                    'mpi_test.py' 
                 ],
+            },
+        },
+        {
+            "machine_spec": machine_spec,
+            "replica_count": 1,
+            "container_spec": {
+                "image_uri": args.train_image,
+                #"command": ["python", TEST_FILE],
+                #"args": [
+                #    #'--train-data=' + args.train_data,
+                #    "echo", "testing" 
+                #],
             },
         }
     ]
@@ -116,45 +122,11 @@ if __name__ == '__main__':
                         default='gcr.io/jk-mlops-dev/mpi-wrapper',
                         help='Training image name')
 
-    parser.add_argument('---data-path',
+    parser.add_argument('--train_data',
                         type=str,
                         default='/gcs/jk-vertex-us-central1/criteo-benchmark-test',
                         help='Criteo parquet data location')
-    parser.add_argument('----out-path',
-                        type=str,
-                        default='/gcs/jk-vertex-us-central1',
-                        help='Output GCS location')
-    parser.add_argument("--protocol",
-                        choices=["tcp", "ucx"],
-                        default="tcp",
-                        type=str,
-                        help="Communication protocol to use (Default 'tcp')")
-    parser.add_argument('--part_mem_frac',
-                        type=float,
-                        required=False,
-                        default=0.125,
-                        help='Desired maximum size of each partition as a fraction of total GPU memory')
-    parser.add_argument('--device_limit_frac',
-                        type=float,
-                        required=False,
-                        default=0.8,
-                        help='Device limit fraction')
-    parser.add_argument('--device_pool_frac',
-                        type=float,
-                        required=False,
-                        default=0.9,
-                        help='Device pool fraction')
-    parser.add_argument("--num-io-threads",
-                        default=0,
-                        type=int,
-                        help="Number of threads to use when writing output data (Default 0). "
-                        "If 0 is specified, multi-threading will not be used for IO.")
-    parser.add_argument("--devices",
-                        default="0,1",
-                        type=str,
-                        help='Comma-separated list of visible devices (e.g. "0,1,2,3"). '
-                        "The number of visible devices dictates the number of Dask workers (GPU processes) "
-                        "The CUDA_VISIBLE_DEVICES environment variable will be used by default")
+    
 
     args = parser.parse_args()
 

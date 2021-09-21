@@ -15,9 +15,9 @@ RUN mkdir -p /root/.ssh/ && \
     cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
 
 
-WORKDIR /src
+WORKDIR /infra
 
-COPY mpi-wrapper.py . 
-COPY mpi-test.py .
+COPY mpi_wrapper.py . 
+COPY mpi_test.py .
 
-#EXPOSE 2222
+ENTRYPOINT ["python", "/infra/mpi_wrapper.py"]
